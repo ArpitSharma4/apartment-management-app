@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,9 +7,11 @@ import {
   TextInput,
   TouchableOpacity,
   Animated,
+  Modal,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, User, ChevronRight, CircleCheck as CheckCircle2, Chrome as Home, Circle as XCircle, PhoneCall, Mail, Filter } from 'lucide-react-native';
+import { Search, User, ChevronRight, CircleCheck as CheckCircle2, Chrome as Home, Circle as XCircle, PhoneCall, Mail, Filter, ArrowLeft, FileText, File, FileCheck, FileSignature, Zap, Droplet, Edit, MoreVertical, UserCheck, LogOut } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/context/ThemeContext';
@@ -138,6 +140,110 @@ const apartmentsData = [
   },
 ];
 
+function UnitDetailModal({ visible, onClose, darkMode, unit }: { visible: boolean; onClose: () => void; darkMode: boolean; unit: any }) {
+  if (!unit) return null;
+  const resident = unit.resident || {};
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
+        <View style={{ backgroundColor: darkMode ? '#222' : '#FFF', borderRadius: 18, width: '92%', maxHeight: '92%', padding: 0, overflow: 'hidden' }}>
+          {/* Header */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', padding: 18, borderBottomWidth: 1, borderBottomColor: darkMode ? '#333' : '#F3F4F6', backgroundColor: darkMode ? '#222' : '#F9FAFB' }}>
+            <TouchableOpacity onPress={onClose} style={{ marginRight: 12 }}>
+              <ArrowLeft size={24} color={darkMode ? '#FFF' : '#1E88E5'} />
+            </TouchableOpacity>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontFamily: 'Inter-SemiBold', fontSize: 20, color: darkMode ? '#FFF' : '#1E88E5' }}>{unit.name}</Text>
+              <Text style={{ fontFamily: 'Inter-Regular', fontSize: 14, color: darkMode ? '#BDBDBD' : '#6B7280' }}>{unit.type} • <Text style={{ color: '#4CAF50' }}>Occupied ✅</Text></Text>
+            </View>
+          </View>
+
+          <ScrollView style={{ padding: 18 }} showsVerticalScrollIndicator={false}>
+            {/* Resident Info */}
+            <Text style={{ fontFamily: 'Inter-SemiBold', fontSize: 16, color: darkMode ? '#FFF' : '#1E88E5', marginBottom: 8 }}>Resident Info</Text>
+            <View style={{ backgroundColor: darkMode ? '#181818' : '#F3F4F6', borderRadius: 10, padding: 14, marginBottom: 18 }}>
+              <Text style={{ fontFamily: 'Inter-Medium', fontSize: 15, color: darkMode ? '#FFF' : '#222' }}>{resident.name || 'John Doe'}</Text>
+              <Text style={{ color: darkMode ? '#BDBDBD' : '#6B7280', marginTop: 2 }}>📞 {resident.phone || '(555) 123-4567'}</Text>
+              <Text style={{ color: darkMode ? '#BDBDBD' : '#6B7280', marginTop: 2 }}>✉️ {resident.email || 'john.doe@example.com'}</Text>
+              <Text style={{ color: darkMode ? '#BDBDBD' : '#6B7280', marginTop: 2 }}>Move-in: {resident.moveInDate || '01/15/2023'}</Text>
+              <Text style={{ color: darkMode ? '#BDBDBD' : '#6B7280', marginTop: 2 }}>Lease: Jan 2023 - Dec 2024</Text>
+            </View>
+
+            {/* Rent Details */}
+            <Text style={{ fontFamily: 'Inter-SemiBold', fontSize: 16, color: darkMode ? '#FFF' : '#1E88E5', marginBottom: 8 }}>Rent Details</Text>
+            <View style={{ backgroundColor: darkMode ? '#181818' : '#F3F4F6', borderRadius: 10, padding: 14, marginBottom: 18 }}>
+              <Text style={{ color: darkMode ? '#FFF' : '#222', fontSize: 15 }}>₹20,000 <Text style={{ color: '#6B7280', fontSize: 13 }}>/ month</Text></Text>
+              <Text style={{ color: darkMode ? '#BDBDBD' : '#6B7280', marginTop: 2 }}>Last Paid: 01 May 2024</Text>
+              <Text style={{ color: darkMode ? '#BDBDBD' : '#6B7280', marginTop: 2 }}>Next Due: 01 June 2024</Text>
+              <TouchableOpacity style={{ marginTop: 10, backgroundColor: '#1E88E5', borderRadius: 8, paddingVertical: 8, alignItems: 'center' }}>
+                <Text style={{ color: '#FFF', fontFamily: 'Inter-SemiBold', fontSize: 15 }}>View Payment History</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Maintenance */}
+            <Text style={{ fontFamily: 'Inter-SemiBold', fontSize: 16, color: darkMode ? '#FFF' : '#1E88E5', marginBottom: 8 }}>Maintenance</Text>
+            <View style={{ backgroundColor: darkMode ? '#181818' : '#F3F4F6', borderRadius: 10, padding: 14, marginBottom: 18 }}>
+              <Text style={{ color: '#E53935', fontFamily: 'Inter-Medium', fontSize: 15 }}>1 Active Issue: Leaking tap</Text>
+              <TouchableOpacity style={{ marginTop: 8 }}>
+                <Text style={{ color: '#1E88E5', fontSize: 14 }}>View all requests</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={{ marginTop: 8, backgroundColor: '#4CAF50', borderRadius: 8, paddingVertical: 8, alignItems: 'center' }}>
+                <Text style={{ color: '#FFF', fontFamily: 'Inter-SemiBold', fontSize: 15 }}>+ Raise New Ticket</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Documents */}
+            <Text style={{ fontFamily: 'Inter-SemiBold', fontSize: 16, color: darkMode ? '#FFF' : '#1E88E5', marginBottom: 8 }}>Documents</Text>
+            <View style={{ backgroundColor: darkMode ? '#181818' : '#F3F4F6', borderRadius: 10, padding: 14, marginBottom: 18 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                <FileText size={18} color="#1E88E5" style={{ marginRight: 8 }} />
+                <Text style={{ color: darkMode ? '#FFF' : '#222' }}>Lease Agreement.pdf</Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                <FileCheck size={18} color="#1E88E5" style={{ marginRight: 8 }} />
+                <Text style={{ color: darkMode ? '#FFF' : '#222' }}>Rent Receipts</Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <FileSignature size={18} color="#1E88E5" style={{ marginRight: 8 }} />
+                <Text style={{ color: darkMode ? '#FFF' : '#222' }}>Resident ID</Text>
+              </View>
+            </View>
+
+            {/* Utilities */}
+            <Text style={{ fontFamily: 'Inter-SemiBold', fontSize: 16, color: darkMode ? '#FFF' : '#1E88E5', marginBottom: 8 }}>Utilities</Text>
+            <View style={{ backgroundColor: darkMode ? '#181818' : '#F3F4F6', borderRadius: 10, padding: 14, marginBottom: 18 }}>
+              <Text style={{ color: darkMode ? '#FFF' : '#222' }}><Zap size={16} color="#FFC107" /> Electricity Meter: 12345678 (Avg: 250 kWh)</Text>
+              <Text style={{ color: darkMode ? '#FFF' : '#222', marginTop: 4 }}><Droplet size={16} color="#1E88E5" /> Water Meter: 87654321 (Avg: 12 KL)</Text>
+            </View>
+
+            {/* Notes */}
+            <Text style={{ fontFamily: 'Inter-SemiBold', fontSize: 16, color: darkMode ? '#FFF' : '#1E88E5', marginBottom: 8 }}>Notes</Text>
+            <View style={{ backgroundColor: darkMode ? '#181818' : '#F3F4F6', borderRadius: 10, padding: 14, marginBottom: 18 }}>
+              <Text style={{ color: darkMode ? '#FFF' : '#222' }}>VIP tenant. Prefers email communication. No pets.</Text>
+            </View>
+
+            {/* Admin Actions */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 18, marginBottom: 8 }}>
+              <TouchableOpacity style={{ flex: 1, backgroundColor: '#1E88E5', borderRadius: 8, paddingVertical: 10, alignItems: 'center', marginRight: 8 }}>
+                <Edit size={18} color="#FFF" style={{ marginRight: 6 }} />
+                <Text style={{ color: '#FFF', fontFamily: 'Inter-SemiBold', fontSize: 15 }}>Edit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={{ flex: 1, backgroundColor: '#FFC107', borderRadius: 8, paddingVertical: 10, alignItems: 'center', marginRight: 8 }}>
+                <UserCheck size={18} color="#FFF" style={{ marginRight: 6 }} />
+                <Text style={{ color: '#FFF', fontFamily: 'Inter-SemiBold', fontSize: 15 }}>Change Status</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={{ flex: 1, backgroundColor: '#E53935', borderRadius: 8, paddingVertical: 10, alignItems: 'center' }}>
+                <LogOut size={18} color="#FFF" style={{ marginRight: 6 }} />
+                <Text style={{ color: '#FFF', fontFamily: 'Inter-SemiBold', fontSize: 15 }}>Vacate Unit</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 export default function DirectoryScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -148,6 +254,9 @@ export default function DirectoryScreen() {
   const { darkMode } = useTheme();
   
   const fadeAnim = useState(new Animated.Value(0))[0];
+  const [unitDetailModal, setUnitDetailModal] = useState(false);
+  const [selectedUnit, setSelectedUnit] = useState<any>(null);
+  const lastTapRef = useRef<number | null>(null);
   
   const toggleFilters = () => {
     if (showFilters) {
@@ -205,13 +314,24 @@ export default function DirectoryScreen() {
     }
   };
   
+  const handleUnitPress = (item: any) => {
+    const now = Date.now();
+    if (item.resident) {
+      if (lastTapRef.current && now - lastTapRef.current < 300) {
+        setSelectedUnit(item);
+        setUnitDetailModal(true);
+      }
+      lastTapRef.current = now;
+    }
+  };
+  
   const renderApartmentItem = ({ item }: { item: typeof apartmentsData[0] }) => {
     const isExpanded = expandedItem === item.id;
     
     return (
       <TouchableOpacity
         style={[styles.apartmentCard, darkMode && styles.apartmentCardDark]}
-        onPress={() => toggleExpand(item.id)}
+        onPress={() => { toggleExpand(item.id); handleUnitPress(item); }}
       >
         <View style={styles.apartmentHeader}>
           <View style={styles.apartmentInfo}>
@@ -234,27 +354,33 @@ export default function DirectoryScreen() {
           </View>
         </View>
         
-        {isExpanded && item.resident && (
-          <View style={styles.residentInfo}>
-            <View style={styles.residentHeader}>
-              <User size={20} color="#1E88E5" />
-              <Text style={[styles.residentName, darkMode && styles.residentNameDark]}>{item.resident.name}</Text>
+        {isExpanded && (
+          item.resident ? (
+            <View style={styles.residentInfo}>
+              <View style={styles.residentHeader}>
+                <User size={20} color="#1E88E5" />
+                <Text style={[styles.residentName, darkMode && styles.residentNameDark]}>{item.resident.name}</Text>
+              </View>
+              <View style={styles.residentDetails}>
+                <View style={styles.residentDetail}>
+                  <PhoneCall size={16} color="#6B7280" />
+                  <Text style={[styles.residentDetailText, darkMode && styles.residentDetailTextDark]}>{item.resident.phone}</Text>
+                </View>
+                <View style={styles.residentDetail}>
+                  <Mail size={16} color="#6B7280" />
+                  <Text style={[styles.residentDetailText, darkMode && styles.residentDetailTextDark]}>{item.resident.email}</Text>
+                </View>
+                <View style={styles.residentDetail}>
+                  <Home size={16} color="#6B7280" />
+                  <Text style={[styles.residentDetailText, darkMode && styles.residentDetailTextDark]}>Moved in: {item.resident.moveInDate}</Text>
+                </View>
+              </View>
             </View>
-            <View style={styles.residentDetails}>
-              <View style={styles.residentDetail}>
-                <PhoneCall size={16} color="#6B7280" />
-                <Text style={[styles.residentDetailText, darkMode && styles.residentDetailTextDark]}>{item.resident.phone}</Text>
-              </View>
-              <View style={styles.residentDetail}>
-                <Mail size={16} color="#6B7280" />
-                <Text style={[styles.residentDetailText, darkMode && styles.residentDetailTextDark]}>{item.resident.email}</Text>
-              </View>
-              <View style={styles.residentDetail}>
-                <Home size={16} color="#6B7280" />
-                <Text style={[styles.residentDetailText, darkMode && styles.residentDetailTextDark]}>Moved in: {item.resident.moveInDate}</Text>
-              </View>
+          ) : (
+            <View style={styles.residentInfo}>
+              <Text style={{ color: darkMode ? '#FFF' : '#6B7280', fontStyle: 'italic', fontSize: 15 }}>This unit is currently vacant.</Text>
             </View>
-          </View>
+          )
         )}
       </TouchableOpacity>
     );
@@ -264,7 +390,7 @@ export default function DirectoryScreen() {
     <SafeAreaView style={[styles.safeArea, darkMode && styles.safeAreaDark]}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={[styles.headerTitle, darkMode && styles.headerTitleDark]}>Directory</Text>
+          <Text style={[styles.headerTitle, darkMode && styles.headerTitleDark]}>HomeHarbor</Text>
           <TouchableOpacity style={styles.filterButton} onPress={toggleFilters}>
             <Filter size={24} color="#1E88E5" />
           </TouchableOpacity>
@@ -375,6 +501,12 @@ export default function DirectoryScreen() {
           showsVerticalScrollIndicator={false}
         />
       </View>
+      <UnitDetailModal
+        visible={unitDetailModal}
+        onClose={() => setUnitDetailModal(false)}
+        darkMode={darkMode}
+        unit={selectedUnit}
+      />
     </SafeAreaView>
   );
 }

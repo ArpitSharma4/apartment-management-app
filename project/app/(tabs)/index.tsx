@@ -14,10 +14,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/context/ThemeContext';
-import { Bell, ChartBar as BarChart4, Clock, CircleAlert as AlertCircle, Package, PenTool as Tool, Calendar, ChevronRight, Users, X } from 'lucide-react-native';
+import { Bell, ChartBar as BarChart4, Clock, CircleAlert as AlertCircle, Package, PenTool as Tool, Calendar, ChevronRight, Users, X, Wrench, Droplets, Zap, FileText, Download, Calendar as CalendarIcon, ChevronDown, Save, Moon, QrCode, CheckCircle2, AlertTriangle, Home as HomeIcon, Building2 } from 'lucide-react-native';
 import { StatusBar } from 'expo-status-bar';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
+import { Swipeable } from 'react-native-gesture-handler';
 
 interface WelcomeCardProps {
   name: string;
@@ -37,14 +38,14 @@ function WelcomeCard({ name, onDismiss, darkMode }: WelcomeCardProps) {
     setChecklist(list => list.map((item, i) => i === idx ? { ...item, done: !item.done } : item));
   };
 
-  return (
+    return (
     <View style={[styles.welcomeCard, darkMode && styles.welcomeCardDark]}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <Text style={[styles.welcomeTitle, darkMode && styles.welcomeTitleDark]}>Welcome, {name}!</Text>
         <TouchableOpacity onPress={onDismiss}>
           <X size={20} color={darkMode ? '#FFF' : '#1E88E5'} />
         </TouchableOpacity>
-      </View>
+          </View>
       <Text style={[styles.welcomeText, darkMode && styles.welcomeTextDark]}>
         Thank you for joining HomeHarbor! Here's a quick start checklist to help you get the most out of your new account:
       </Text>
@@ -53,11 +54,11 @@ function WelcomeCard({ name, onDismiss, darkMode }: WelcomeCardProps) {
           <TouchableOpacity key={item.label} style={styles.checklistItem} onPress={() => handleCheck(idx)}>
             <View style={[styles.checkbox, item.done && styles.checkboxChecked, darkMode && styles.checkboxDark]}>
               {item.done && <View style={styles.checkboxInner} />}
-            </View>
+          </View>
             <Text style={[styles.checklistLabel, darkMode && styles.checklistLabelDark, item.done && styles.checklistLabelDone]}>{item.label}</Text>
           </TouchableOpacity>
         ))}
-      </View>
+          </View>
       <View style={styles.quickActionsRow}>
         <TouchableOpacity style={[styles.quickActionBtn, { backgroundColor: '#1E88E5' }]} onPress={() => {/* TODO: navigate to profile */}}>
           <Text style={styles.quickActionBtnText}>Edit Profile</Text>
@@ -65,7 +66,7 @@ function WelcomeCard({ name, onDismiss, darkMode }: WelcomeCardProps) {
         <TouchableOpacity style={[styles.quickActionBtn, { backgroundColor: '#4CAF50' }]} onPress={() => {/* TODO: navigate to directory */}}>
           <Text style={styles.quickActionBtnText}>Directory</Text>
         </TouchableOpacity>
-      </View>
+        </View>
       <View style={styles.quickActionsRow}>
         <TouchableOpacity style={[styles.quickActionBtn, { backgroundColor: '#FFC107' }]} onPress={() => {/* TODO: navigate to announcements */}}>
           <Text style={styles.quickActionBtnText}>Announcements</Text>
@@ -98,8 +99,8 @@ function AdminApprovals() {
           </TouchableOpacity>
           <TouchableOpacity onPress={() => rejectUser(user.id)} style={styles.rejectBtn}>
             <Text style={styles.rejectBtnText}>Reject</Text>
-          </TouchableOpacity>
-        </View>
+            </TouchableOpacity>
+          </View>
       ))}
     </View>
   );
@@ -156,7 +157,7 @@ function AnnouncementModal({ visible, onClose, darkMode }: AnnouncementModalProp
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text style={[styles.modalTitle, darkMode && styles.modalTitleDark]}>📝 Create Announcement</Text>
             <TouchableOpacity onPress={onClose}><X size={24} color={darkMode ? '#FFF' : '#1E88E5'} /></TouchableOpacity>
-          </View>
+            </View>
           <ScrollView style={{ maxHeight: 350 }}>
             <Text style={styles.inputLabel}>Title</Text>
             <TextInput
@@ -189,7 +190,7 @@ function AnnouncementModal({ visible, onClose, darkMode }: AnnouncementModalProp
                   <Text style={[styles.dropdownBtnText, audience === opt && styles.dropdownBtnTextActive]}>{opt}</Text>
                 </TouchableOpacity>
               ))}
-            </View>
+          </View>
             <Text style={styles.inputLabel}>Priority Level</Text>
             <View style={styles.dropdownRow}>
               {priorityOptions.map(opt => (
@@ -251,22 +252,657 @@ function AnnouncementModal({ visible, onClose, darkMode }: AnnouncementModalProp
   );
 }
 
+interface MaintenanceModalProps {
+  visible: boolean;
+  onClose: () => void;
+  darkMode: boolean;
+}
+
+function MaintenanceModal({ visible, onClose, darkMode }: MaintenanceModalProps) {
+  // Demo data
+  const summary = [
+    { label: 'New Requests', count: 3, icon: <Wrench size={22} color="#E53935" />, color: '#FFEAEA' },
+    { label: 'Pending', count: 7, icon: <Wrench size={22} color="#FFC107" />, color: '#FFF8E1' },
+    { label: 'Resolved', count: 21, icon: <Wrench size={22} color="#4CAF50" />, color: '#E8F5E9' },
+  ];
+  const recent = [
+    { icon: <Droplets size={20} color="#1E88E5" />, text: 'Leaking Faucet – Unit 304', time: '10 mins ago' },
+    { icon: <Zap size={20} color="#FFC107" />, text: 'Power Issue – Unit 110', time: '1 hour ago' },
+  ];
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={[styles.maintenanceModal, darkMode && styles.modalContentDark]}> 
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={[styles.modalTitle, darkMode && styles.modalTitleDark]}>🛠️ Maintenance</Text>
+            <TouchableOpacity onPress={onClose}><X size={24} color={darkMode ? '#FFF' : '#1E88E5'} /></TouchableOpacity>
+            </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 16 }}>
+            {summary.map((s, i) => (
+              <View key={s.label} style={[styles.maintSummaryCard, { backgroundColor: s.color, marginRight: i < summary.length - 1 ? 12 : 0 }]}> 
+                {s.icon}
+                <Text style={styles.maintSummaryCount}>{s.count}</Text>
+                <Text style={styles.maintSummaryLabel}>{s.label}</Text>
+            </View>
+            ))}
+          </ScrollView>
+          <Text style={[styles.sectionTitle, darkMode && styles.sectionTitleDark, { marginBottom: 8 }]}>Recent Requests</Text>
+          {recent.map((r, i) => (
+            <View key={i} style={[styles.maintRecentCard, darkMode && styles.maintRecentCardDark]}> 
+              {r.icon}
+              <View style={{ marginLeft: 10 }}>
+                <Text style={styles.maintRecentText}>{r.text}</Text>
+                <Text style={styles.maintRecentTime}>{r.time}</Text>
+          </View>
+            </View>
+          ))}
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+interface ReportsModalProps {
+  visible: boolean;
+  onClose: () => void;
+  darkMode: boolean;
+}
+
+function ReportsModal({ visible, onClose, darkMode }: ReportsModalProps) {
+  const [showTypes, setShowTypes] = React.useState(false);
+  const [exportType, setExportType] = React.useState<'CSV' | 'PDF'>('CSV');
+  const [dateFilter, setDateFilter] = React.useState<'This Month' | 'Last Month'>('This Month');
+  const lastUpdated = 'May 22, 2025 · 12:30 PM';
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={[styles.reportsModal, darkMode && styles.modalContentDark]}> 
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={[styles.modalTitle, darkMode && styles.modalTitleDark]}>📊 Reports</Text>
+            <TouchableOpacity onPress={onClose}><X size={24} color={darkMode ? '#FFF' : '#1E88E5'} /></TouchableOpacity>
+          </View>
+          <View style={{ marginVertical: 16 }}>
+            <TouchableOpacity style={styles.reportActionBtn} onPress={() => setShowTypes(v => !v)}>
+              <FileText size={20} color="#1E88E5" style={{ marginRight: 8 }} />
+              <Text style={styles.reportActionText}>View Summary Reports</Text>
+              <ChevronDown size={18} color="#1E88E5" style={{ marginLeft: 4 }} />
+            </TouchableOpacity>
+            {showTypes && (
+              <View style={styles.reportTypesList}>
+                <Text style={styles.reportTypeItem}>• Occupancy</Text>
+                <Text style={styles.reportTypeItem}>• Maintenance</Text>
+                <Text style={styles.reportTypeItem}>• Payments</Text>
+              </View>
+            )}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 16 }}>
+              <TouchableOpacity
+                style={[styles.exportBtn, exportType === 'CSV' && styles.exportBtnActive]}
+                onPress={() => setExportType('CSV')}
+              >
+                <Download size={18} color={exportType === 'CSV' ? '#FFF' : '#1E88E5'} />
+                <Text style={[styles.exportBtnText, exportType === 'CSV' && styles.exportBtnTextActive]}>Export CSV</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.exportBtn, exportType === 'PDF' && styles.exportBtnActive]}
+                onPress={() => setExportType('PDF')}
+              >
+                <Download size={18} color={exportType === 'PDF' ? '#FFF' : '#1E88E5'} />
+                <Text style={[styles.exportBtnText, exportType === 'PDF' && styles.exportBtnTextActive]}>Export PDF</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 16 }}>
+              <TouchableOpacity
+                style={[styles.dateFilterBtn, dateFilter === 'This Month' && styles.dateFilterBtnActive]}
+                onPress={() => setDateFilter('This Month')}
+              >
+                <CalendarIcon size={16} color={dateFilter === 'This Month' ? '#FFF' : '#1E88E5'} />
+                <Text style={[styles.dateFilterText, dateFilter === 'This Month' && styles.dateFilterTextActive]}>This Month</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.dateFilterBtn, dateFilter === 'Last Month' && styles.dateFilterBtnActive]}
+                onPress={() => setDateFilter('Last Month')}
+              >
+                <CalendarIcon size={16} color={dateFilter === 'Last Month' ? '#FFF' : '#1E88E5'} />
+                <Text style={[styles.dateFilterText, dateFilter === 'Last Month' && styles.dateFilterTextActive]}>Last Month</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.lastUpdatedText}>Last updated: {lastUpdated}</Text>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+interface Activity {
+  id: string;
+  title: string;
+  description: string;
+  time: string;
+  icon: React.ReactNode;
+}
+
+interface ScheduleModalProps {
+  visible: boolean;
+  onClose: () => void;
+  darkMode: boolean;
+  onSave: (activity: Activity) => void;
+}
+
+function ScheduleModal({ visible, onClose, darkMode, onSave }: ScheduleModalProps) {
+  const [selectedDate, setSelectedDate] = React.useState(new Date());
+  const [selectedTime, setSelectedTime] = React.useState(new Date());
+  const [note, setNote] = React.useState('');
+  const [showDatePicker, setShowDatePicker] = React.useState(false);
+  const [showTimePicker, setShowTimePicker] = React.useState(false);
+
+  const handleSave = () => {
+    const newActivity: Activity = {
+      id: Date.now().toString(),
+      title: 'New Schedule Added',
+      description: note || 'Scheduled Event',
+      time: 'Just now',
+      icon: <Calendar size={20} color="#1E88E5" />
+    };
+    onSave(newActivity);
+    onClose();
+    // Reset form
+    setNote('');
+    setSelectedDate(new Date());
+    setSelectedTime(new Date());
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={[styles.scheduleModal, darkMode && styles.modalContentDark]}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={[styles.modalTitle, darkMode && styles.modalTitleDark]}>🗓️ Manage Schedule</Text>
+            <TouchableOpacity onPress={onClose}><X size={24} color={darkMode ? '#FFF' : '#1E88E5'} /></TouchableOpacity>
+          </View>
+
+          <View style={styles.scheduleModalContent}>
+            {/* Date Picker */}
+            <TouchableOpacity 
+              style={[styles.scheduleField, darkMode && styles.scheduleFieldDark]}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <CalendarIcon size={20} color={darkMode ? '#FFF' : '#1E88E5'} style={{ marginRight: 8 }} />
+              <Text style={[styles.scheduleFieldText, darkMode && styles.scheduleFieldTextDark]}>
+                {selectedDate.toLocaleDateString()}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Time Picker */}
+            <TouchableOpacity 
+              style={[styles.scheduleField, darkMode && styles.scheduleFieldDark]}
+              onPress={() => setShowTimePicker(true)}
+            >
+              <Clock size={20} color={darkMode ? '#FFF' : '#1E88E5'} style={{ marginRight: 8 }} />
+              <Text style={[styles.scheduleFieldText, darkMode && styles.scheduleFieldTextDark]}>
+                {selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Note Field */}
+            <View style={styles.noteContainer}>
+              <Text style={[styles.noteLabel, darkMode && styles.noteLabelDark]}>Note (Optional)</Text>
+              <TextInput
+                style={[styles.noteInput, darkMode && styles.noteInputDark]}
+                placeholder="e.g., Water Tank Cleaning"
+                placeholderTextColor={darkMode ? '#666' : '#999'}
+                value={note}
+                onChangeText={setNote}
+                multiline
+              />
+            </View>
+
+            {/* Date Picker Modal */}
+            {showDatePicker && (
+              <DateTimePicker
+                value={selectedDate}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={(event, date) => {
+                  setShowDatePicker(false);
+                  if (date) setSelectedDate(date);
+                }}
+              />
+            )}
+
+            {/* Time Picker Modal */}
+            {showTimePicker && (
+              <DateTimePicker
+                value={selectedTime}
+                mode="time"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={(event, time) => {
+                  setShowTimePicker(false);
+                  if (time) setSelectedTime(time);
+                }}
+              />
+            )}
+
+            {/* Action Buttons */}
+            <View style={styles.scheduleActions}>
+              <TouchableOpacity 
+                style={[styles.scheduleButton, styles.cancelButton, darkMode && styles.cancelButtonDark]}
+                onPress={onClose}
+              >
+                <Text style={[styles.scheduleButtonText, styles.cancelButtonText, darkMode && styles.cancelButtonTextDark]}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.scheduleButton, styles.saveButton]}
+                onPress={handleSave}
+              >
+                <Save size={18} color="#FFF" style={{ marginRight: 6 }} />
+                <Text style={styles.saveButtonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+// Fix: Add explicit prop types
+interface SimpleModalProps {
+  visible: boolean;
+  onClose: () => void;
+  darkMode: boolean;
+}
+
+function InviteVisitorModal({ visible, onClose, darkMode }: SimpleModalProps) {
+  const [name, setName] = React.useState('');
+  const [mobile, setMobile] = React.useState('');
+  const [visitTime, setVisitTime] = React.useState('');
+  const [purpose, setPurpose] = React.useState('');
+  const [submitted, setSubmitted] = React.useState(false);
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <View style={[styles.profileModal, darkMode && styles.modalContentDark]}> 
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={[styles.modalTitle, darkMode && styles.modalTitleDark]}>Invite Visitor</Text>
+            <TouchableOpacity onPress={onClose}><X size={24} color={darkMode ? '#FFF' : '#1E88E5'} /></TouchableOpacity>
+          </View>
+          {submitted ? (
+            <View style={{ alignItems: 'center', marginTop: 24 }}>
+              <QrCode size={64} color="#1E88E5" />
+              <Text style={{ color: darkMode ? '#FFF' : '#1E88E5', fontSize: 18, fontFamily: 'Inter-SemiBold', marginTop: 12 }}>Gate Pass Generated</Text>
+              <Text style={{ color: darkMode ? '#FFF' : '#333', marginTop: 8, textAlign: 'center' }}>Show this QR code at the gate for visitor entry.</Text>
+              <TouchableOpacity style={[styles.editProfileButton, { marginTop: 24 }]} onPress={onClose}>
+                <Text style={styles.editProfileButtonText}>Done</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <>
+              <TextInput style={[styles.input, darkMode && styles.inputDark]} placeholder="Visitor Name" placeholderTextColor={darkMode ? '#888' : '#999'} value={name} onChangeText={setName} />
+              <TextInput style={[styles.input, darkMode && styles.inputDark]} placeholder="Mobile Number" placeholderTextColor={darkMode ? '#888' : '#999'} value={mobile} onChangeText={setMobile} keyboardType="phone-pad" />
+              <TextInput style={[styles.input, darkMode && styles.inputDark]} placeholder="Visit Time (e.g., 2024-06-01 15:00)" placeholderTextColor={darkMode ? '#888' : '#999'} value={visitTime} onChangeText={setVisitTime} />
+              <TextInput style={[styles.input, darkMode && styles.inputDark]} placeholder="Purpose" placeholderTextColor={darkMode ? '#888' : '#999'} value={purpose} onChangeText={setPurpose} />
+              <TouchableOpacity style={[styles.editProfileButton, { marginTop: 12 }]} onPress={() => setSubmitted(true)} disabled={!name || !mobile || !visitTime || !purpose}>
+                <Text style={styles.editProfileButtonText}>Generate Pass</Text>
+              </TouchableOpacity>
+            </>
+          )}
+          </View>
+          </View>
+    </Modal>
+  );
+}
+
+function BookAmenityModal({ visible, onClose, darkMode }: SimpleModalProps) {
+  const [amenity, setAmenity] = React.useState('Gym');
+  const [date, setDate] = React.useState('');
+  const [time, setTime] = React.useState('');
+  const [submitted, setSubmitted] = React.useState(false);
+  const amenities = ['Gym', 'Clubhouse', 'Pool', 'Tennis Court'];
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <View style={[styles.profileModal, darkMode && styles.modalContentDark]}> 
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={[styles.modalTitle, darkMode && styles.modalTitleDark]}>Book Amenity</Text>
+            <TouchableOpacity onPress={onClose}><X size={24} color={darkMode ? '#FFF' : '#1E88E5'} /></TouchableOpacity>
+          </View>
+          {submitted ? (
+            <View style={{ alignItems: 'center', marginTop: 24 }}>
+              <CheckCircle2 size={64} color="#4CAF50" />
+              <Text style={{ color: darkMode ? '#FFF' : '#4CAF50', fontSize: 18, fontFamily: 'Inter-SemiBold', marginTop: 12 }}>Booking Confirmed</Text>
+              <Text style={{ color: darkMode ? '#FFF' : '#333', marginTop: 8, textAlign: 'center' }}>Your booking for the {amenity} is confirmed.</Text>
+              <TouchableOpacity style={[styles.editProfileButton, { marginTop: 24 }]} onPress={onClose}>
+                <Text style={styles.editProfileButtonText}>Done</Text>
+              </TouchableOpacity>
+        </View>
+          ) : (
+            <>
+              <View style={{ flexDirection: 'row', marginBottom: 8 }}>
+                {amenities.map(a => (
+                  <TouchableOpacity key={a} style={[styles.dropdownBtn, amenity === a && styles.dropdownBtnActive]} onPress={() => setAmenity(a)}>
+                    <Text style={[styles.dropdownBtnText, amenity === a && styles.dropdownBtnTextActive]}>{a}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <TextInput style={[styles.input, darkMode && styles.inputDark]} placeholder="Date (e.g., 2024-06-01)" placeholderTextColor={darkMode ? '#888' : '#999'} value={date} onChangeText={setDate} />
+              <TextInput style={[styles.input, darkMode && styles.inputDark]} placeholder="Time Slot (e.g., 16:00-17:00)" placeholderTextColor={darkMode ? '#888' : '#999'} value={time} onChangeText={setTime} />
+              <TouchableOpacity style={[styles.editProfileButton, { marginTop: 12 }]} onPress={() => setSubmitted(true)} disabled={!date || !time}>
+                <Text style={styles.editProfileButtonText}>Confirm Booking</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function ReportIssueModal({ visible, onClose, darkMode }: SimpleModalProps) {
+  const [issueType, setIssueType] = React.useState('Noise');
+  const [description, setDescription] = React.useState('');
+  const [submitted, setSubmitted] = React.useState(false);
+  const issueTypes = ['Noise', 'Security', 'Sanitation', 'Other'];
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <View style={[styles.profileModal, darkMode && styles.modalContentDark]}> 
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={[styles.modalTitle, darkMode && styles.modalTitleDark]}>Report Issue</Text>
+            <TouchableOpacity onPress={onClose}><X size={24} color={darkMode ? '#FFF' : '#1E88E5'} /></TouchableOpacity>
+          </View>
+          {submitted ? (
+            <View style={{ alignItems: 'center', marginTop: 24 }}>
+              <AlertTriangle size={64} color="#FFC107" />
+              <Text style={{ color: darkMode ? '#FFF' : '#FFC107', fontSize: 18, fontFamily: 'Inter-SemiBold', marginTop: 12 }}>Report Submitted</Text>
+              <Text style={{ color: darkMode ? '#FFF' : '#333', marginTop: 8, textAlign: 'center' }}>Your issue has been sent to the relevant authority.</Text>
+              <TouchableOpacity style={[styles.editProfileButton, { marginTop: 24 }]} onPress={onClose}>
+                <Text style={styles.editProfileButtonText}>Done</Text>
+            </TouchableOpacity>
+          </View>
+          ) : (
+            <>
+              <View style={{ flexDirection: 'row', marginBottom: 8 }}>
+                {issueTypes.map(t => (
+                  <TouchableOpacity key={t} style={[styles.dropdownBtn, issueType === t && styles.dropdownBtnActive]} onPress={() => setIssueType(t)}>
+                    <Text style={[styles.dropdownBtnText, issueType === t && styles.dropdownBtnTextActive]}>{t}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <TextInput style={[styles.input, darkMode && styles.inputDark]} placeholder="Describe the issue..." placeholderTextColor={darkMode ? '#888' : '#999'} value={description} onChangeText={setDescription} multiline numberOfLines={4} />
+              <TouchableOpacity style={[styles.editProfileButton, { marginTop: 12 }]} onPress={() => setSubmitted(true)} disabled={!description}>
+                <Text style={styles.editProfileButtonText}>Submit Report</Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function ViewRequestsModal({ visible, onClose, darkMode }: SimpleModalProps) {
+  const requests = [
+    {
+      id: '1',
+      title: 'Kitchen Sink Repair',
+      status: 'In Progress',
+      time: 'Submitted 2 days ago',
+      icon: <Tool size={20} color="#E53935" />,
+      description: 'Leaking faucet in kitchen sink, water pooling under cabinet'
+    },
+    {
+      id: '2',
+      title: 'AC Maintenance',
+      status: 'Completed',
+      time: 'Completed 1 week ago',
+      icon: <Tool size={20} color="#4CAF50" />,
+      description: 'Annual AC service and filter replacement'
+    }
+  ];
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <View style={[styles.profileModal, darkMode && styles.modalContentDark]}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={[styles.modalTitle, darkMode && styles.modalTitleDark]}>Your Requests</Text>
+            <TouchableOpacity onPress={onClose}><X size={24} color={darkMode ? '#FFF' : '#1E88E5'} /></TouchableOpacity>
+            </View>
+          <ScrollView style={{ maxHeight: 400 }}>
+            {requests.map(request => (
+              <View key={request.id} style={[styles.requestCard, darkMode && styles.requestCardDark]}>
+                <View style={[styles.requestIconContainer, { backgroundColor: request.status === 'Completed' ? '#E8F5E9' : '#FFEBEE' }]}>
+                  {request.icon}
+            </View>
+                <View style={styles.requestContent}>
+                  <Text style={[styles.requestTitle, darkMode && styles.requestTitleDark]}>{request.title}</Text>
+                  <Text style={[styles.requestStatus, { color: request.status === 'Completed' ? '#4CAF50' : '#E53935' }]}>
+                    Status: {request.status}
+                  </Text>
+                  <Text style={[styles.requestDescription, darkMode && styles.requestDescriptionDark]}>
+                    {request.description}
+                  </Text>
+                  <Text style={[styles.requestTime, darkMode && styles.requestTimeDark]}>{request.time}</Text>
+          </View>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+// Helper for priority color
+const PRIORITY_COLORS = {
+  High: '#E53935',
+  Medium: '#FFC107',
+  Low: '#4CAF50',
+};
+
+type TaskPriority = 'High' | 'Medium' | 'Low';
+interface StaffTask {
+  id: string;
+  title: string;
+  location: string;
+  time: string;
+  priority: TaskPriority;
+}
+
+interface StaffTaskCardProps {
+  task: StaffTask;
+  status: 'pending' | 'accepted' | 'rejected';
+  onAccept: () => void;
+  onReject: () => void;
+  darkMode: boolean;
+}
+
+function StaffTaskCard({ task, status, onAccept, onReject, darkMode }: StaffTaskCardProps) {
+  const priorityColor = PRIORITY_COLORS[task.priority];
+  let bgColor = '#FFF';
+  let statusText = '';
+  let statusBg = undefined;
+  if (status === 'accepted') {
+    bgColor = '#E8F5E9';
+    statusText = 'Accepted';
+    statusBg = { backgroundColor: '#4CAF50' };
+  } else if (status === 'rejected') {
+    bgColor = '#FFEBEE';
+    statusText = 'Rejected';
+    statusBg = { backgroundColor: '#E53935' };
+  }
+  return (
+    <Swipeable
+      renderLeftActions={() => (
+        <View style={{ flex: 1, backgroundColor: '#E8F5E9', justifyContent: 'center', alignItems: 'flex-start', borderRadius: 12 }}>
+          <Text style={{ color: '#4CAF50', fontWeight: 'bold', fontSize: 16, marginLeft: 24 }}>Accepted</Text>
+            </View>
+      )}
+      renderRightActions={() => (
+        <View style={{ flex: 1, backgroundColor: '#FFEBEE', justifyContent: 'center', alignItems: 'flex-end', borderRadius: 12 }}>
+          <Text style={{ color: '#E53935', fontWeight: 'bold', fontSize: 16, marginRight: 24 }}>Rejected</Text>
+            </View>
+      )}
+      onSwipeableLeftOpen={() => {
+        onAccept();
+        // Add a small delay before removing the task
+        setTimeout(() => {
+          onAccept();
+        }, 300);
+      }}
+      onSwipeableRightOpen={() => {
+        onReject();
+        // Add a small delay before removing the task
+        setTimeout(() => {
+          onReject();
+        }, 300);
+      }}
+      overshootLeft={false}
+      overshootRight={false}
+      enabled={status === 'pending'}
+    >
+      <View style={[styles.taskCard, { backgroundColor: bgColor }, darkMode && styles.taskCardDark]}>
+        <View style={[styles.taskPriority, { backgroundColor: priorityColor }]} />
+        <View style={styles.taskContent}>
+          <Text style={styles.taskTitle}>{task.title}</Text>
+          <Text style={styles.taskLocation}>{task.location}</Text>
+          <Text style={styles.taskTime}>{task.time}</Text>
+          <View style={[styles.taskStatus, { backgroundColor: priorityColor + '22' }]}> {/* faded */}
+            <Text style={[styles.taskStatusText, { color: priorityColor }]}>{task.priority} Priority</Text>
+          </View>
+          {status !== 'pending' && (
+            <View style={[styles.taskStatus, statusBg, { marginTop: 8 }]}> 
+              <Text style={[styles.taskStatusText, { color: '#FFF' }]}>{statusText}</Text>
+            </View>
+          )}
+        </View>
+        {status === 'pending' && (
+          <TouchableOpacity style={[styles.taskAction, { backgroundColor: '#E8F4FD' }]} onPress={onAccept}>
+            <Text style={styles.taskActionText}>Accept</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </Swipeable>
+  );
+}
+
+const STAFF_TASKS: StaffTask[] = [
+  {
+    id: '1',
+    title: 'Fix Leaking Faucet',
+    location: 'Unit 304',
+    time: 'Reported 10 minutes ago',
+    priority: 'High',
+  },
+  {
+    id: '2',
+    title: 'Replace Light Bulb',
+    location: 'Unit 207 - Hallway',
+    time: 'Reported yesterday',
+    priority: 'Medium',
+  },
+  {
+    id: '3',
+    title: 'Check AC Unit',
+    location: 'Unit 512',
+    time: 'Reported 2 days ago',
+    priority: 'Low',
+  },
+];
+
 export default function HomeScreen() {
   const { user, userRole } = useAuth();
-  const { darkMode } = useTheme();
+  const { darkMode, setDarkMode } = useTheme();
   const [showWelcome, setShowWelcome] = React.useState(true);
   const [modalVisible, setModalVisible] = React.useState(false);
   const [modalContent, setModalContent] = React.useState<{title: string, description: string, time: string, icon: React.ReactNode} | null>(null);
   const [announcementModal, setAnnouncementModal] = React.useState(false);
+  const [maintenanceModal, setMaintenanceModal] = React.useState(false);
+  const [reportsModal, setReportsModal] = React.useState(false);
+  const [scheduleModal, setScheduleModal] = React.useState(false);
   const router = useRouter();
+  const [activities, setActivities] = React.useState<Activity[]>([
+    {
+      id: '1',
+      title: 'New Maintenance Request',
+      description: 'Unit 304 - Leaking Faucet',
+      time: '10 minutes ago',
+      icon: <AlertCircle size={20} color="#E53935" />
+    },
+    {
+      id: '2',
+      title: 'Package Delivered',
+      description: 'Unit 201 - Amazon',
+      time: '1 hour ago',
+      icon: <Package size={20} color="#1E88E5" />
+    },
+    {
+      id: '3',
+      title: 'New Resident',
+      description: 'Unit 105 - John Smith',
+      time: '2 days ago',
+      icon: <Users size={20} color="#4CAF50" />
+    }
+  ]);
+  const [inviteVisitorModal, setInviteVisitorModal] = React.useState(false);
+  const [bookAmenityModal, setBookAmenityModal] = React.useState(false);
+  const [reportIssueModal, setReportIssueModal] = React.useState(false);
+  const [viewRequestsModal, setViewRequestsModal] = React.useState(false);
+
+  // Update the task status management
+  const [taskStatuses, setTaskStatuses] = React.useState<{ [id: string]: 'pending' | 'accepted' | 'rejected' }>({
+    '1': 'pending',
+    '2': 'pending',
+    '3': 'pending',
+  });
+
+  const [visibleTasks, setVisibleTasks] = React.useState(STAFF_TASKS);
+
+  const handleAccept = (id: string) => {
+    setTaskStatuses(s => ({ ...s, [id]: 'accepted' }));
+    // Remove the task after a short delay
+    setTimeout(() => {
+      setVisibleTasks(tasks => tasks.filter(task => task.id !== id));
+    }, 300);
+  };
+
+  const handleReject = (id: string) => {
+    setTaskStatuses(s => ({ ...s, [id]: 'rejected' }));
+    // Remove the task after a short delay
+    setTimeout(() => {
+      setVisibleTasks(tasks => tasks.filter(task => task.id !== id));
+    }, 300);
+  };
 
   // Only show welcome for non-demo users (not admin@example.com, resident@example.com, staff@example.com)
   const isDemoUser = user?.email === 'admin@example.com' || user?.email === 'resident@example.com' || user?.email === 'staff@example.com';
   const shouldShowWelcome = showWelcome && user && !isDemoUser;
   
-  const handleActivityPress = (activity: {title: string, description: string, time: string, icon: React.ReactNode}) => {
+  const handleActivityPress = (activity: Activity) => {
     setModalContent(activity);
     setModalVisible(true);
+  };
+
+  const handleActivitySave = (newActivity: Activity) => {
+    setActivities(prev => [newActivity, ...prev]);
   };
 
   const renderAdminDashboard = () => {
@@ -295,65 +931,23 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
           
-          <TouchableOpacity
-            onPress={() => handleActivityPress({
-              title: 'New Maintenance Request',
-              description: 'Unit 304 - Leaking Faucet',
-              time: '10 minutes ago',
-              icon: <AlertCircle size={20} color="#E53935" />
-            })}
-            style={[styles.activityCard, darkMode && styles.activityCardDark]}
-          >
+          {activities.map(activity => (
+            <TouchableOpacity
+              key={activity.id}
+              onPress={() => handleActivityPress(activity)}
+              style={[styles.activityCard, darkMode && styles.activityCardDark]}
+            >
             <View style={styles.activityIconContainer}>
-              <AlertCircle size={20} color="#E53935" />
+                {activity.icon}
             </View>
             <View style={styles.activityContent}>
-              <Text style={[styles.activityTitle, darkMode && styles.activityTitleDark]}>New Maintenance Request</Text>
-              <Text style={[styles.activityDescription, darkMode && styles.activityDescriptionDark]}>Unit 304 - Leaking Faucet</Text>
-              <Text style={[styles.activityTime, darkMode && styles.activityTimeDark]}>10 minutes ago</Text>
+                <Text style={[styles.activityTitle, darkMode && styles.activityTitleDark]}>{activity.title}</Text>
+                <Text style={[styles.activityDescription, darkMode && styles.activityDescriptionDark]}>{activity.description}</Text>
+                <Text style={[styles.activityTime, darkMode && styles.activityTimeDark]}>{activity.time}</Text>
             </View>
             <ChevronRight size={20} color="#9CA3AF" />
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            onPress={() => handleActivityPress({
-              title: 'Package Delivered',
-              description: 'Unit 201 - Amazon',
-              time: '1 hour ago',
-              icon: <Package size={20} color="#1E88E5" />
-            })}
-            style={[styles.activityCard, darkMode && styles.activityCardDark]}
-          >
-            <View style={styles.activityIconContainer}>
-              <Package size={20} color="#1E88E5" />
-            </View>
-            <View style={styles.activityContent}>
-              <Text style={[styles.activityTitle, darkMode && styles.activityTitleDark]}>Package Delivered</Text>
-              <Text style={[styles.activityDescription, darkMode && styles.activityDescriptionDark]}>Unit 201 - Amazon</Text>
-              <Text style={[styles.activityTime, darkMode && styles.activityTimeDark]}>1 hour ago</Text>
-            </View>
-            <ChevronRight size={20} color="#9CA3AF" />
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            onPress={() => handleActivityPress({
-              title: 'New Resident',
-              description: 'Unit 105 - John Smith',
-              time: '2 days ago',
-              icon: <Users size={20} color="#4CAF50" />
-            })}
-            style={[styles.activityCard, darkMode && styles.activityCardDark]}
-          >
-            <View style={styles.activityIconContainer}>
-              <Users size={20} color="#4CAF50" />
-            </View>
-            <View style={styles.activityContent}>
-              <Text style={[styles.activityTitle, darkMode && styles.activityTitleDark]}>New Resident</Text>
-              <Text style={[styles.activityDescription, darkMode && styles.activityDescriptionDark]}>Unit 105 - John Smith</Text>
-              <Text style={[styles.activityTime, darkMode && styles.activityTimeDark]}>2 days ago</Text>
-            </View>
-            <ChevronRight size={20} color="#9CA3AF" />
-          </TouchableOpacity>
+            </TouchableOpacity>
+          ))}
         </View>
         
         <View style={[styles.section, darkMode && styles.sectionDark]}>
@@ -371,21 +965,30 @@ export default function HomeScreen() {
               <Text style={[styles.quickActionText, darkMode && styles.quickActionTextDark]}>Announcements</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity style={[styles.quickActionCard, darkMode && styles.quickActionCardDark]}>
+            <TouchableOpacity
+              style={[styles.quickActionCard, darkMode && styles.quickActionCardDark]}
+              onPress={() => setMaintenanceModal(true)}
+            >
               <View style={[styles.quickActionIcon, { backgroundColor: '#E8F5E9' }]}>
                 <Tool size={24} color="#4CAF50" />
               </View>
               <Text style={[styles.quickActionText, darkMode && styles.quickActionTextDark]}>Maintenance</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity style={[styles.quickActionCard, darkMode && styles.quickActionCardDark]}>
+            <TouchableOpacity
+              style={[styles.quickActionCard, darkMode && styles.quickActionCardDark]}
+              onPress={() => setReportsModal(true)}
+            >
               <View style={[styles.quickActionIcon, { backgroundColor: '#FFF8E1' }]}>
                 <BarChart4 size={24} color="#FFC107" />
               </View>
               <Text style={[styles.quickActionText, darkMode && styles.quickActionTextDark]}>Reports</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity style={[styles.quickActionCard, darkMode && styles.quickActionCardDark]}>
+            <TouchableOpacity
+              style={[styles.quickActionCard, darkMode && styles.quickActionCardDark]}
+              onPress={() => setScheduleModal(true)}
+            >
               <View style={[styles.quickActionIcon, { backgroundColor: '#F3E5F5' }]}>
                 <Calendar size={24} color="#9C27B0" />
               </View>
@@ -412,30 +1015,39 @@ export default function HomeScreen() {
             <Text style={[styles.sectionTitle, darkMode && styles.sectionTitleDark]}>Quick Actions</Text>
           </View>
           <View style={styles.quickActionsGrid}>
-            <TouchableOpacity style={[styles.quickActionCard, darkMode && styles.quickActionCardDark]}>
+            <TouchableOpacity
+              style={[styles.quickActionCard, darkMode && styles.quickActionCardDark]}
+              onPress={() => router.push({ pathname: '/request-repair' })}
+            >
               <View style={[styles.quickActionIcon, { backgroundColor: '#E8F5E9' }]}>
                 <Tool size={24} color="#4CAF50" />
               </View>
               <Text style={[styles.quickActionText, darkMode && styles.quickActionTextDark]}>Request Repair</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity style={[styles.quickActionCard, darkMode && styles.quickActionCardDark]}>
+            <TouchableOpacity
+              style={[styles.quickActionCard, darkMode && styles.quickActionCardDark]}
+              onPress={() => setInviteVisitorModal(true)}
+            >
               <View style={[styles.quickActionIcon, { backgroundColor: '#E8F4FD' }]}>
                 <Users size={24} color="#1E88E5" />
               </View>
               <Text style={[styles.quickActionText, darkMode && styles.quickActionTextDark]}>Invite Visitor</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity style={[styles.quickActionCard, darkMode && styles.quickActionCardDark]}>
+            <TouchableOpacity
+              style={[styles.quickActionCard, darkMode && styles.quickActionCardDark]}
+              onPress={() => setBookAmenityModal(true)}
+            >
               <View style={[styles.quickActionIcon, { backgroundColor: '#FFF8E1' }]}>
-                <Calendar size={24} color="#FFC107" />
+                <CalendarIcon size={24} color="#FFC107" />
               </View>
               <Text style={[styles.quickActionText, darkMode && styles.quickActionTextDark]}>Book Amenity</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity style={[styles.quickActionCard, darkMode && styles.quickActionCardDark]}>
+            <TouchableOpacity
+              style={[styles.quickActionCard, darkMode && styles.quickActionCardDark]}
+              onPress={() => setReportIssueModal(true)}
+            >
               <View style={[styles.quickActionIcon, { backgroundColor: '#FFEBEE' }]}>
-                <AlertCircle size={24} color="#E53935" />
+                <AlertTriangle size={24} color="#E53935" />
               </View>
               <Text style={[styles.quickActionText, darkMode && styles.quickActionTextDark]}>Report Issue</Text>
             </TouchableOpacity>
@@ -445,12 +1057,15 @@ export default function HomeScreen() {
         <View style={[styles.section, darkMode && styles.sectionDark]}>
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, darkMode && styles.sectionTitleDark]}>Your Requests</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => setViewRequestsModal(true)}>
               <Text style={[styles.seeAllText, darkMode && styles.seeAllTextDark]}>See All</Text>
             </TouchableOpacity>
           </View>
           
-          <View style={[styles.activityCard, darkMode && styles.activityCardDark]}>
+          <TouchableOpacity 
+            style={[styles.activityCard, darkMode && styles.activityCardDark]}
+            onPress={() => setViewRequestsModal(true)}
+          >
             <View style={[styles.activityIconContainer, { backgroundColor: '#FFEBEE' }]}>
               <Tool size={20} color="#E53935" />
             </View>
@@ -460,9 +1075,12 @@ export default function HomeScreen() {
               <Text style={[styles.activityTime, darkMode && styles.activityTimeDark]}>Submitted 2 days ago</Text>
             </View>
             <ChevronRight size={20} color="#9CA3AF" />
-          </View>
+          </TouchableOpacity>
           
-          <View style={[styles.activityCard, darkMode && styles.activityCardDark]}>
+          <TouchableOpacity 
+            style={[styles.activityCard, darkMode && styles.activityCardDark]}
+            onPress={() => setViewRequestsModal(true)}
+          >
             <View style={[styles.activityIconContainer, { backgroundColor: '#E8F5E9' }]}>
               <Tool size={20} color="#4CAF50" />
             </View>
@@ -472,7 +1090,7 @@ export default function HomeScreen() {
               <Text style={[styles.activityTime, darkMode && styles.activityTimeDark]}>Completed 1 week ago</Text>
             </View>
             <ChevronRight size={20} color="#9CA3AF" />
-          </View>
+          </TouchableOpacity>
         </View>
         
         <View style={[styles.section, darkMode && styles.sectionDark]}>
@@ -510,11 +1128,20 @@ export default function HomeScreen() {
             </View>
           </View>
         </View>
+        <ViewRequestsModal 
+          visible={viewRequestsModal} 
+          onClose={() => setViewRequestsModal(false)} 
+          darkMode={darkMode} 
+        />
       </>
     );
   };
   
-  const renderStaffDashboard = () => {
+  const renderStaffDashboard = (
+    taskStatuses: { [id: string]: 'pending' | 'accepted' | 'rejected' },
+    handleAccept: (id: string) => void,
+    handleReject: (id: string) => void
+  ) => {
     return (
       <>
         <View style={styles.section}>
@@ -524,51 +1151,16 @@ export default function HomeScreen() {
               <Text style={styles.seeAllText}>See All</Text>
             </TouchableOpacity>
           </View>
-          
-          <View style={styles.taskCard}>
-            <View style={[styles.taskPriority, { backgroundColor: '#E53935' }]} />
-            <View style={styles.taskContent}>
-              <Text style={styles.taskTitle}>Fix Leaking Faucet</Text>
-              <Text style={styles.taskLocation}>Unit 304</Text>
-              <Text style={styles.taskTime}>Reported 10 minutes ago</Text>
-              <View style={styles.taskStatus}>
-                <Text style={styles.taskStatusText}>High Priority</Text>
-              </View>
-            </View>
-            <TouchableOpacity style={styles.taskAction}>
-              <Text style={styles.taskActionText}>Accept</Text>
-            </TouchableOpacity>
-          </View>
-          
-          <View style={styles.taskCard}>
-            <View style={[styles.taskPriority, { backgroundColor: '#FFC107' }]} />
-            <View style={styles.taskContent}>
-              <Text style={styles.taskTitle}>Replace Light Bulb</Text>
-              <Text style={styles.taskLocation}>Unit 207 - Hallway</Text>
-              <Text style={styles.taskTime}>Reported yesterday</Text>
-              <View style={[styles.taskStatus, { backgroundColor: '#FFF8E1' }]}>
-                <Text style={[styles.taskStatusText, { color: '#FF8F00' }]}>Medium Priority</Text>
-              </View>
-            </View>
-            <TouchableOpacity style={styles.taskAction}>
-              <Text style={styles.taskActionText}>Accept</Text>
-            </TouchableOpacity>
-          </View>
-          
-          <View style={styles.taskCard}>
-            <View style={[styles.taskPriority, { backgroundColor: '#4CAF50' }]} />
-            <View style={styles.taskContent}>
-              <Text style={styles.taskTitle}>Check AC Unit</Text>
-              <Text style={styles.taskLocation}>Unit 512</Text>
-              <Text style={styles.taskTime}>Reported 2 days ago</Text>
-              <View style={[styles.taskStatus, { backgroundColor: '#E8F5E9' }]}>
-                <Text style={[styles.taskStatusText, { color: '#2E7D32' }]}>Low Priority</Text>
-              </View>
-            </View>
-            <TouchableOpacity style={styles.taskAction}>
-              <Text style={styles.taskActionText}>Accept</Text>
-            </TouchableOpacity>
-          </View>
+          {visibleTasks.map(task => (
+            <StaffTaskCard
+              key={task.id}
+              task={task}
+              status={taskStatuses[task.id]}
+              onAccept={() => handleAccept(task.id)}
+              onReject={() => handleReject(task.id)}
+              darkMode={darkMode}
+            />
+          ))}
         </View>
         
         <View style={styles.section}>
@@ -641,19 +1233,41 @@ export default function HomeScreen() {
             {userRole === 'admin' ? 'Administrator' : userRole === 'staff' ? 'Staff Member' : 'Resident - Unit 304'}
           </Text>
         </View>
-        <TouchableOpacity style={styles.notificationButton}>
+        <TouchableOpacity style={styles.notificationButton} onPress={() => router.push('/notifications')}>
           <Bell size={24} color="#1E88E5" />
           <View style={styles.notificationBadge}>
             <Text style={styles.notificationBadgeText}>3</Text>
           </View>
         </TouchableOpacity>
       </View>
+
       {userRole === 'admin' && <AdminApprovals />}
       {shouldShowWelcome && (
         <WelcomeCard name={user?.name || 'User'} onDismiss={() => setShowWelcome(false)} darkMode={darkMode} />
       )}
+      
+      <ScrollView 
+        style={[styles.scrollView, darkMode && styles.scrollViewDark]}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {userRole === 'admin' && renderAdminDashboard()}
+        {userRole === 'resident' && renderResidentDashboard()}
+        {userRole === 'staff' && renderStaffDashboard(taskStatuses, handleAccept, handleReject)}
+      </ScrollView>
+
       <AnnouncementModal visible={announcementModal} onClose={() => setAnnouncementModal(false)} darkMode={darkMode} />
-      {/* Activity Modal */}
+      <MaintenanceModal visible={maintenanceModal} onClose={() => setMaintenanceModal(false)} darkMode={darkMode} />
+      <ReportsModal visible={reportsModal} onClose={() => setReportsModal(false)} darkMode={darkMode} />
+      <ScheduleModal 
+        visible={scheduleModal} 
+        onClose={() => setScheduleModal(false)} 
+        darkMode={darkMode}
+        onSave={handleActivitySave}
+      />
+      <InviteVisitorModal visible={inviteVisitorModal} onClose={() => setInviteVisitorModal(false)} darkMode={darkMode} />
+      <BookAmenityModal visible={bookAmenityModal} onClose={() => setBookAmenityModal(false)} darkMode={darkMode} />
+      <ReportIssueModal visible={reportIssueModal} onClose={() => setReportIssueModal(false)} darkMode={darkMode} />
       <Modal
         visible={modalVisible}
         transparent
@@ -674,15 +1288,6 @@ export default function HomeScreen() {
           </View>
         </View>
       </Modal>
-      <ScrollView 
-        style={[styles.scrollView, darkMode && styles.scrollViewDark]}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {userRole === 'admin' && renderAdminDashboard()}
-        {userRole === 'resident' && renderResidentDashboard()}
-        {userRole === 'staff' && renderStaffDashboard()}
-      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -1425,5 +2030,386 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     marginTop: 8,
+  },
+  maintenanceModal: {
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 20,
+    width: '90%',
+    maxWidth: 400,
+    alignItems: 'stretch',
+  },
+  maintSummaryCard: {
+    minWidth: 110,
+    borderRadius: 12,
+    padding: 14,
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  maintSummaryCount: {
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 22,
+    color: '#1E88E5',
+    marginTop: 4,
+  },
+  maintSummaryLabel: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 13,
+    color: '#333',
+    marginTop: 2,
+  },
+  maintRecentCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 8,
+  },
+  maintRecentCardDark: {
+    backgroundColor: '#222',
+  },
+  maintRecentText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 15,
+    color: '#1E88E5',
+  },
+  maintRecentTime: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 12,
+    color: '#6B7280',
+  },
+  reportsModal: {
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 20,
+    width: '90%',
+    maxWidth: 400,
+    alignItems: 'stretch',
+  },
+  reportActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E8F4FD',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+  },
+  reportActionText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 15,
+    color: '#1E88E5',
+  },
+  reportTypesList: {
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  reportTypeItem: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 2,
+  },
+  exportBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E8F4FD',
+    borderRadius: 8,
+    padding: 10,
+    marginRight: 8,
+  },
+  exportBtnActive: {
+    backgroundColor: '#1E88E5',
+  },
+  exportBtnText: {
+    color: '#1E88E5',
+    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    marginLeft: 6,
+  },
+  exportBtnTextActive: {
+    color: '#FFF',
+  },
+  dateFilterBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E8F4FD',
+    borderRadius: 8,
+    padding: 8,
+    marginRight: 8,
+  },
+  dateFilterBtnActive: {
+    backgroundColor: '#1E88E5',
+  },
+  dateFilterText: {
+    color: '#1E88E5',
+    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    marginLeft: 4,
+  },
+  dateFilterTextActive: {
+    color: '#FFF',
+  },
+  lastUpdatedText: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 18,
+    textAlign: 'center',
+  },
+  scheduleModal: {
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 20,
+    width: '90%',
+    maxWidth: 400,
+    alignItems: 'stretch',
+  },
+  scheduleModalContent: {
+    marginTop: 16,
+  },
+  scheduleField: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+  },
+  scheduleFieldDark: {
+    backgroundColor: '#333',
+  },
+  scheduleFieldText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 16,
+    color: '#1E88E5',
+  },
+  scheduleFieldTextDark: {
+    color: '#FFF',
+  },
+  noteContainer: {
+    marginBottom: 20,
+  },
+  noteLabel: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    color: '#1E88E5',
+    marginBottom: 8,
+  },
+  noteLabelDark: {
+    color: '#FFF',
+  },
+  noteInput: {
+    backgroundColor: '#F3F4F6',
+    borderRadius: 8,
+    padding: 12,
+    fontFamily: 'Inter-Regular',
+    fontSize: 16,
+    color: '#333',
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  noteInputDark: {
+    backgroundColor: '#333',
+    color: '#FFF',
+  },
+  scheduleActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  scheduleButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    borderRadius: 8,
+    marginHorizontal: 4,
+  },
+  cancelButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#1E88E5',
+  },
+  cancelButtonDark: {
+    borderColor: '#FFF',
+  },
+  saveButton: {
+    backgroundColor: '#1E88E5',
+  },
+  scheduleButtonText: {
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 16,
+  },
+  cancelButtonText: {
+    color: '#1E88E5',
+  },
+  cancelButtonTextDark: {
+    color: '#FFF',
+  },
+  saveButtonText: {
+    color: '#FFF',
+  },
+  profileModal: {
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 20,
+    width: '90%',
+    maxWidth: 400,
+    alignItems: 'stretch',
+  },
+  profileContent: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  profileAvatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#1E88E5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  profileAvatarText: {
+    color: '#FFF',
+    fontSize: 32,
+    fontFamily: 'Inter-SemiBold',
+  },
+  profileInfo: {
+    width: '100%',
+    marginBottom: 24,
+  },
+  profileField: {
+    marginBottom: 16,
+  },
+  profileLabel: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    color: '#6B7280',
+    marginBottom: 4,
+  },
+  profileLabelDark: {
+    color: '#9CA3AF',
+  },
+  profileValue: {
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 16,
+    color: '#1E88E5',
+  },
+  profileValueDark: {
+    color: '#FFF',
+  },
+  editProfileButton: {
+    backgroundColor: '#1E88E5',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    width: '100%',
+  },
+  editProfileButtonDark: {
+    backgroundColor: '#2563EB',
+  },
+  editProfileButtonText: {
+    color: '#FFF',
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 16,
+  },
+  settingsItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  settingsItemDark: {
+    backgroundColor: '#333',
+  },
+  settingsItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  settingsIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  settingsText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 16,
+    color: '#1E88E5',
+  },
+  settingsTextDark: {
+    color: '#FFF',
+  },
+  requestCard: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 1,
+  },
+  requestCardDark: {
+    backgroundColor: '#333',
+  },
+  requestIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  requestContent: {
+    flex: 1,
+  },
+  requestTitle: {
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 16,
+    color: '#1E88E5',
+  },
+  requestTitleDark: {
+    color: '#FFF',
+  },
+  requestStatus: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    marginTop: 2,
+  },
+  requestDescription: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 14,
+    color: '#4B5563',
+    marginTop: 4,
+  },
+  requestDescriptionDark: {
+    color: '#FFF',
+  },
+  requestTime: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginTop: 4,
+  },
+  requestTimeDark: {
+    color: '#FFF',
+  },
+  taskCardDark: {
+    backgroundColor: '#222',
   },
 });
