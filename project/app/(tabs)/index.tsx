@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -17,7 +17,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { Bell, ChartBar as BarChart4, Clock, CircleAlert as AlertCircle, Package, PenTool as Tool, Calendar, ChevronRight, Users, X, Wrench, Droplets, Zap, FileText, Download, Calendar as CalendarIcon, ChevronDown, Save, Moon, QrCode, CheckCircle2, AlertTriangle, Home as HomeIcon, Building2 } from 'lucide-react-native';
 import { StatusBar } from 'expo-status-bar';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Swipeable } from 'react-native-gesture-handler';
 
 interface WelcomeCardProps {
@@ -615,11 +615,21 @@ function BookAmenityModal({ visible, onClose, darkMode }: SimpleModalProps) {
   );
 }
 
-function ReportIssueModal({ visible, onClose, darkMode }: SimpleModalProps) {
+interface ReportIssueModalProps extends SimpleModalProps {
+  onIssueReported: (issueType: string, description: string) => void;
+}
+
+function ReportIssueModal({ visible, onClose, darkMode, onIssueReported }: ReportIssueModalProps) {
   const [issueType, setIssueType] = React.useState('Noise');
   const [description, setDescription] = React.useState('');
   const [submitted, setSubmitted] = React.useState(false);
   const issueTypes = ['Noise', 'Security', 'Sanitation', 'Other'];
+  
+  const handleSubmit = () => {
+    setSubmitted(true);
+    onIssueReported(issueType, description);
+  };
+
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
@@ -647,7 +657,7 @@ function ReportIssueModal({ visible, onClose, darkMode }: SimpleModalProps) {
                 ))}
               </View>
               <TextInput style={[styles.input, darkMode && styles.inputDark]} placeholder="Describe the issue..." placeholderTextColor={darkMode ? '#888' : '#999'} value={description} onChangeText={setDescription} multiline numberOfLines={4} />
-              <TouchableOpacity style={[styles.editProfileButton, { marginTop: 12 }]} onPress={() => setSubmitted(true)} disabled={!description}>
+              <TouchableOpacity style={[styles.editProfileButton, { marginTop: 12 }]} onPress={handleSubmit} disabled={!description}>
                 <Text style={styles.editProfileButtonText}>Submit Report</Text>
               </TouchableOpacity>
             </>
@@ -658,26 +668,13 @@ function ReportIssueModal({ visible, onClose, darkMode }: SimpleModalProps) {
   );
 }
 
-function ViewRequestsModal({ visible, onClose, darkMode }: SimpleModalProps) {
-  const requests = [
-    {
-      id: '1',
-      title: 'Kitchen Sink Repair',
-      status: 'In Progress',
-      time: 'Submitted 2 days ago',
-      icon: <Tool size={20} color="#E53935" />,
-      description: 'Leaking faucet in kitchen sink, water pooling under cabinet'
-    },
-    {
-      id: '2',
-      title: 'AC Maintenance',
-      status: 'Completed',
-      time: 'Completed 1 week ago',
-      icon: <Tool size={20} color="#4CAF50" />,
-      description: 'Annual AC service and filter replacement'
-    }
-  ];
+// Extend Activity for repair requests
+interface ResidentRequest extends Activity {
+  status: string;
+  description: string;
+}
 
+function ViewRequestsModal({ visible, onClose, darkMode, requests }: SimpleModalProps & { requests: ResidentRequest[] }) {
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
@@ -826,6 +823,15 @@ const STAFF_TASKS: StaffTask[] = [
     time: 'Reported 2 days ago',
     priority: 'Low',
   },
+];
+
+// Add at the top: categories for repair
+const REPAIR_CATEGORIES = [
+  'Plumbing',
+  'Electrical',
+  'Carpentry',
+  'Appliance',
+  'Other',
 ];
 
 export default function HomeScreen() {
@@ -1017,7 +1023,7 @@ export default function HomeScreen() {
           <View style={styles.quickActionsGrid}>
             <TouchableOpacity
               style={[styles.quickActionCard, darkMode && styles.quickActionCardDark]}
-              onPress={() => router.push({ pathname: '/request-repair' })}
+              onPress={() => setRepairModal(true)}
             >
               <View style={[styles.quickActionIcon, { backgroundColor: '#E8F5E9' }]}>
                 <Tool size={24} color="#4CAF50" />
@@ -1062,37 +1068,25 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
           
-          <TouchableOpacity 
-            style={[styles.activityCard, darkMode && styles.activityCardDark]}
-            onPress={() => setViewRequestsModal(true)}
-          >
-            <View style={[styles.activityIconContainer, { backgroundColor: '#FFEBEE' }]}>
-              <Tool size={20} color="#E53935" />
+          {residentRequests.map(request => (
+            <TouchableOpacity 
+              key={request.id}
+              style={[styles.activityCard, darkMode && styles.activityCardDark]}
+              onPress={() => setViewRequestsModal(true)}
+            >
+              <View style={[styles.activityIconContainer, { backgroundColor: request.status === 'Completed' ? '#E8F5E9' : '#FFEBEE' }]}> 
+                {request.icon}
             </View>
             <View style={styles.activityContent}>
-              <Text style={[styles.activityTitle, darkMode && styles.activityTitleDark]}>Kitchen Sink Repair</Text>
-              <Text style={[styles.activityDescription, darkMode && styles.activityDescriptionDark]}>Status: In Progress</Text>
-              <Text style={[styles.activityTime, darkMode && styles.activityTimeDark]}>Submitted 2 days ago</Text>
+                <Text style={[styles.activityTitle, darkMode && styles.activityTitleDark]}>{request.title}</Text>
+                <Text style={[styles.activityDescription, darkMode && styles.activityDescriptionDark]}>Status: {request.status}</Text>
+                <Text style={[styles.activityTime, darkMode && styles.activityTimeDark]}>{request.time}</Text>
             </View>
             <ChevronRight size={20} color="#9CA3AF" />
-          </TouchableOpacity>
+            </TouchableOpacity>
+          ))}
+          </View>
           
-          <TouchableOpacity 
-            style={[styles.activityCard, darkMode && styles.activityCardDark]}
-            onPress={() => setViewRequestsModal(true)}
-          >
-            <View style={[styles.activityIconContainer, { backgroundColor: '#E8F5E9' }]}>
-              <Tool size={20} color="#4CAF50" />
-            </View>
-            <View style={styles.activityContent}>
-              <Text style={[styles.activityTitle, darkMode && styles.activityTitleDark]}>AC Maintenance</Text>
-              <Text style={[styles.activityDescription, darkMode && styles.activityDescriptionDark]}>Status: Completed</Text>
-              <Text style={[styles.activityTime, darkMode && styles.activityTimeDark]}>Completed 1 week ago</Text>
-            </View>
-            <ChevronRight size={20} color="#9CA3AF" />
-          </TouchableOpacity>
-        </View>
-        
         <View style={[styles.section, darkMode && styles.sectionDark]}>
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, darkMode && styles.sectionTitleDark]}>Upcoming Events</Text>
@@ -1132,7 +1126,49 @@ export default function HomeScreen() {
           visible={viewRequestsModal} 
           onClose={() => setViewRequestsModal(false)} 
           darkMode={darkMode} 
+          requests={residentRequests}
         />
+        <Modal visible={repairModal} transparent animationType="slide" onRequestClose={() => setRepairModal(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={[styles.addUnitModal, darkMode && styles.addUnitModalDark]}> 
+              <Text style={[styles.modalTitle, darkMode && styles.modalTitleDark]}>Request Repair</Text>
+              <Text style={styles.inputLabel}>Category</Text>
+              <View style={styles.dropdownRow}>
+                {REPAIR_CATEGORIES.map(cat => (
+                  <TouchableOpacity
+                    key={cat}
+                    style={[styles.dropdownBtn, repairCategory === cat && styles.dropdownBtnActive]}
+                    onPress={() => setRepairCategory(cat)}
+                  >
+                    <Text style={[styles.dropdownBtnText, repairCategory === cat && styles.dropdownBtnTextActive]}>{cat}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={styles.inputLabel}>Description</Text>
+              <TextInput
+                style={[styles.input, darkMode && styles.inputDark, { minHeight: 60 }]}
+                placeholder="Describe the issue..."
+                placeholderTextColor={darkMode ? '#888' : '#999'}
+                value={repairDescription}
+                onChangeText={setRepairDescription}
+                multiline
+                numberOfLines={4}
+              />
+              <View style={{ flexDirection: 'row', marginTop: 16 }}>
+                <TouchableOpacity style={[styles.addUnitModalBtn, { backgroundColor: '#E53935', marginRight: 8 }]} onPress={() => setRepairModal(false)}>
+                  <Text style={{ color: '#FFF', fontWeight: 'bold' }}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.addUnitModalBtn, { backgroundColor: '#1E88E5' }]}
+                  onPress={handleAddResidentRequest}
+                  disabled={repairSubmitting || !repairDescription}
+                >
+                  <Text style={{ color: '#FFF', fontWeight: 'bold' }}>{repairSubmitting ? 'Submitting...' : 'Submit'}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </>
     );
   };
@@ -1221,6 +1257,95 @@ export default function HomeScreen() {
     );
   };
 
+  // Resident repair requests state
+  const [residentRequests, setResidentRequests] = React.useState<ResidentRequest[]>([
+    {
+      id: '1',
+      title: 'Kitchen Sink Repair',
+      status: 'In Progress',
+      time: 'Submitted 2 days ago',
+      icon: <Tool size={20} color="#E53935" />,
+      description: 'Leaking faucet in kitchen sink, water pooling under cabinet'
+    },
+    {
+      id: '2',
+      title: 'AC Maintenance',
+      status: 'Completed',
+      time: 'Completed 1 week ago',
+      icon: <Tool size={20} color="#4CAF50" />,
+      description: 'Annual AC service and filter replacement'
+    }
+  ]);
+
+  // Handler to add a new repair request
+  const handleAddResidentRequest = () => {
+    setRepairSubmitting(true);
+    setTimeout(() => {
+      setResidentRequests(prev => [
+        {
+          id: Date.now().toString(),
+          title: repairCategory + ' Repair',
+          description: repairDescription,
+          status: 'In Progress',
+          time: 'Just now',
+          icon: <Tool size={20} color="#E53935" />,
+        },
+        ...prev
+      ]);
+      setRepairSubmitting(false);
+      setRepairModal(false);
+      setRepairCategory(REPAIR_CATEGORIES[0]);
+      setRepairDescription('');
+    }, 900);
+  };
+
+  // Resident repair request modal state (move these up for scope)
+  const [repairModal, setRepairModal] = React.useState(false);
+  const [repairCategory, setRepairCategory] = React.useState(REPAIR_CATEGORIES[0]);
+  const [repairDescription, setRepairDescription] = React.useState('');
+  const [repairSubmitting, setRepairSubmitting] = React.useState(false);
+
+  const [notifications, setNotifications] = React.useState([
+    {
+      id: '1',
+      title: 'New Maintenance Request',
+      body: 'Unit 304 - Leaking Faucet',
+      icon: <AlertCircle size={20} color="#E53935" />,
+      time: '10 minutes ago',
+      read: false
+    },
+    {
+      id: '2',
+      title: 'Package Delivered',
+      body: 'Unit 201 - Amazon',
+      icon: <Package size={20} color="#1E88E5" />,
+      time: '1 hour ago',
+      read: false
+    },
+    {
+      id: '3',
+      title: 'New Resident',
+      body: 'Unit 105 - John Smith',
+      icon: <Users size={20} color="#4CAF50" />,
+      time: '2 days ago',
+      read: false
+    }
+  ]);
+  const [notificationCount, setNotificationCount] = React.useState(3);
+
+  const handleIssueReported = (issueType: string, description: string) => {
+    const newNotification = {
+      id: Date.now().toString(),
+      title: 'Issue Reported',
+      body: `${issueType} Issue: ${description}`,
+      icon: <AlertTriangle size={20} color="#E53935" />,
+      time: 'Just now',
+      read: false
+    };
+    setNotifications(prev => [newNotification, ...prev]);
+    setNotificationCount(prev => prev + 1);
+  };
+
   return (
     <SafeAreaView style={[styles.container, darkMode && styles.containerDark]}>
       <StatusBar style="auto" />
@@ -1267,7 +1392,12 @@ export default function HomeScreen() {
       />
       <InviteVisitorModal visible={inviteVisitorModal} onClose={() => setInviteVisitorModal(false)} darkMode={darkMode} />
       <BookAmenityModal visible={bookAmenityModal} onClose={() => setBookAmenityModal(false)} darkMode={darkMode} />
-      <ReportIssueModal visible={reportIssueModal} onClose={() => setReportIssueModal(false)} darkMode={darkMode} />
+      <ReportIssueModal 
+        visible={reportIssueModal} 
+        onClose={() => setReportIssueModal(false)} 
+        darkMode={darkMode}
+        onIssueReported={handleIssueReported}
+      />
       <Modal
         visible={modalVisible}
         transparent
@@ -2411,5 +2541,22 @@ const styles = StyleSheet.create({
   },
   taskCardDark: {
     backgroundColor: '#222',
+  },
+  addUnitModal: {
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 20,
+    width: '90%',
+    maxWidth: 400,
+    alignItems: 'stretch',
+  },
+  addUnitModalDark: {
+    backgroundColor: '#333',
+  },
+  addUnitModalBtn: {
+    flex: 1,
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
   },
 });

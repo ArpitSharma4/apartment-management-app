@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/context/ThemeContext';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 
 const categories = [
   'Plumbing',
@@ -15,6 +15,7 @@ const categories = [
 export default function RequestRepairPage() {
   const { darkMode } = useTheme();
   const router = useRouter();
+  const params = useLocalSearchParams();
   const [category, setCategory] = useState(categories[0]);
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -25,6 +26,17 @@ export default function RequestRepairPage() {
     setTimeout(() => {
       setSubmitting(false);
       setSubmitted(true);
+      if (params.onSubmit) {
+        try {
+          const handler = eval(params.onSubmit);
+          if (typeof handler === 'function') {
+            handler({
+              title: category + ' Repair',
+              description,
+            });
+          }
+        } catch (e) {}
+      }
       setTimeout(() => {
         router.back();
       }, 1200);

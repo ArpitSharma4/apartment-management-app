@@ -253,10 +253,22 @@ export default function DirectoryScreen() {
   const { userRole } = useAuth();
   const { darkMode } = useTheme();
   
+  // Add Unit Modal State
+  const [addUnitModal, setAddUnitModal] = useState(false);
+  const [newUnit, setNewUnit] = useState({ number: '', floor: '', type: '1 Bedroom', status: 'vacant' });
+  const [apartments, setApartments] = useState(apartmentsData);
+  const unitTypes = ['Studio', '1 Bedroom', '2 Bedroom', '3 Bedroom'];
+  const statusTypes = ['vacant', 'occupied'];
+
   const fadeAnim = useState(new Animated.Value(0))[0];
   const [unitDetailModal, setUnitDetailModal] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState<any>(null);
   const lastTapRef = useRef<number | null>(null);
+  
+  // Edit Unit Modal State
+  const [editUnitModal, setEditUnitModal] = useState(false);
+  const [editUnit, setEditUnit] = useState<any>(null);
+  const [editResident, setEditResident] = useState({ name: '', email: '', phone: '', moveInDate: '' });
   
   const toggleFilters = () => {
     if (showFilters) {
@@ -277,7 +289,41 @@ export default function DirectoryScreen() {
     }
   };
   
-  const filteredApartments = apartmentsData
+  const handleAddUnit = () => {
+    if (!newUnit.number || !newUnit.floor) return;
+    setApartments(prev => [
+      ...prev,
+      {
+        id: (prev.length + 1).toString(),
+        number: newUnit.number,
+        floor: newUnit.floor,
+        type: newUnit.type,
+        status: newUnit.status,
+        resident: null,
+      },
+    ]);
+    setAddUnitModal(false);
+    setNewUnit({ number: '', floor: '', type: '1 Bedroom', status: 'vacant' });
+  };
+  
+  const handleEditUnit = () => {
+    if (!editUnit) return;
+    setApartments(prev => prev.map(unit => {
+      if (unit.id === editUnit.id) {
+        if (editUnit.status === 'occupied') {
+          return { ...unit, status: 'occupied', resident: { ...editResident } };
+        } else {
+          return { ...unit, status: 'vacant', resident: null };
+        }
+      }
+      return unit;
+    }));
+    setEditUnitModal(false);
+    setEditUnit(null);
+    setEditResident({ name: '', email: '', phone: '', moveInDate: '' });
+  };
+  
+  const filteredApartments = apartments
     .filter(apt => {
       // Apply search
       const searchLower = searchQuery.toLowerCase();
@@ -351,6 +397,12 @@ export default function DirectoryScreen() {
               </View>
             )}
             <ChevronRight size={20} color="#9CA3AF" />
+            {/* Edit button for admin only */}
+            {userRole === 'admin' && (
+              <TouchableOpacity style={styles.editUnitBtn} onPress={() => { setEditUnit(item); setEditUnitModal(true); }}>
+                <Text style={styles.editUnitBtnText}>Edit</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
         
@@ -395,6 +447,58 @@ export default function DirectoryScreen() {
             <Filter size={24} color="#1E88E5" />
           </TouchableOpacity>
         </View>
+        {/* Add Unit Button for Admin Only */}
+        {userRole === 'admin' && (
+          <TouchableOpacity style={[styles.addUnitButton, darkMode && styles.addUnitButtonDark]} onPress={() => setAddUnitModal(true)}>
+            <Text style={styles.addUnitButtonText}>+ Add Unit</Text>
+          </TouchableOpacity>
+        )}
+        {/* Add Unit Modal */}
+        <Modal visible={addUnitModal} transparent animationType="slide" onRequestClose={() => setAddUnitModal(false)}>
+          <View style={styles.modalOverlay}>
+            <View style={[styles.addUnitModal, darkMode && styles.addUnitModalDark]}>
+              <Text style={[styles.modalTitle, darkMode && styles.modalTitleDark]}>Add New Unit</Text>
+              <TextInput
+                style={[styles.input, darkMode && styles.inputDark]}
+                placeholder="Unit Number"
+                value={newUnit.number}
+                onChangeText={val => setNewUnit(u => ({ ...u, number: val }))}
+                placeholderTextColor={darkMode ? '#888' : '#999'}
+              />
+              <TextInput
+                style={[styles.input, darkMode && styles.inputDark]}
+                placeholder="Floor"
+                value={newUnit.floor}
+                onChangeText={val => setNewUnit(u => ({ ...u, floor: val }))}
+                placeholderTextColor={darkMode ? '#888' : '#999'}
+              />
+              <Text style={[styles.inputLabel, darkMode && styles.inputLabelDark]}>Type</Text>
+              <View style={styles.dropdownRow}>
+                {unitTypes.map(type => (
+                  <TouchableOpacity key={type} style={[styles.dropdownBtn, newUnit.type === type && styles.dropdownBtnActive]} onPress={() => setNewUnit(u => ({ ...u, type }))}>
+                    <Text style={[styles.dropdownBtnText, newUnit.type === type && styles.dropdownBtnTextActive]}>{type}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={[styles.inputLabel, darkMode && styles.inputLabelDark]}>Status</Text>
+              <View style={styles.dropdownRow}>
+                {statusTypes.map(status => (
+                  <TouchableOpacity key={status} style={[styles.dropdownBtn, newUnit.status === status && styles.dropdownBtnActive]} onPress={() => setNewUnit(u => ({ ...u, status }))}>
+                    <Text style={[styles.dropdownBtnText, newUnit.status === status && styles.dropdownBtnTextActive]}>{status.charAt(0).toUpperCase() + status.slice(1)}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <View style={{ flexDirection: 'row', marginTop: 16 }}>
+                <TouchableOpacity style={[styles.addUnitModalBtn, { backgroundColor: '#E53935', marginRight: 8 }]} onPress={() => setAddUnitModal(false)}>
+                  <Text style={{ color: '#FFF', fontWeight: 'bold' }}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.addUnitModalBtn, { backgroundColor: '#1E88E5' }]} onPress={handleAddUnit}>
+                  <Text style={{ color: '#FFF', fontWeight: 'bold' }}>Add</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
         
         <View style={styles.searchContainer}>
           <Search size={20} color="#6B7280" />
@@ -507,6 +611,72 @@ export default function DirectoryScreen() {
         darkMode={darkMode}
         unit={selectedUnit}
       />
+      {/* Edit Unit Modal */}
+      <Modal visible={editUnitModal} transparent animationType="slide" onRequestClose={() => setEditUnitModal(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.addUnitModal, darkMode && styles.addUnitModalDark]}>
+            <Text style={[styles.modalTitle, darkMode && styles.modalTitleDark]}>Edit Unit Status</Text>
+            <Text style={[styles.inputLabel, darkMode && styles.inputLabelDark]}>Status</Text>
+            <View style={styles.dropdownRow}>
+              {['vacant', 'occupied'].map(status => (
+                <TouchableOpacity key={status} style={[styles.dropdownBtn, editUnit?.status === status && styles.dropdownBtnActive]} onPress={() => {
+                  setEditUnit((u: any) => ({ ...u, status }));
+                  if (status === 'occupied' && (!editUnit.resident || editUnit.status === 'vacant')) {
+                    setEditResident({ name: '', email: '', phone: '', moveInDate: '' });
+                  }
+                }}>
+                  <Text style={[styles.dropdownBtnText, editUnit?.status === status && styles.dropdownBtnTextActive]}>{status.charAt(0).toUpperCase() + status.slice(1)}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {/* Show tenant info fields if switching to occupied */}
+            {editUnit?.status === 'occupied' && (
+              <View>
+                <Text style={[styles.inputLabel, darkMode && styles.inputLabelDark]}>Tenant Name</Text>
+                <TextInput
+                  style={[styles.input, darkMode && styles.inputDark]}
+                  placeholder="Name"
+                  value={editResident.name}
+                  onChangeText={val => setEditResident(r => ({ ...r, name: val }))}
+                  placeholderTextColor={darkMode ? '#888' : '#999'}
+                />
+                <Text style={[styles.inputLabel, darkMode && styles.inputLabelDark]}>Email</Text>
+                <TextInput
+                  style={[styles.input, darkMode && styles.inputDark]}
+                  placeholder="Email"
+                  value={editResident.email}
+                  onChangeText={val => setEditResident(r => ({ ...r, email: val }))}
+                  placeholderTextColor={darkMode ? '#888' : '#999'}
+                />
+                <Text style={[styles.inputLabel, darkMode && styles.inputLabelDark]}>Phone</Text>
+                <TextInput
+                  style={[styles.input, darkMode && styles.inputDark]}
+                  placeholder="Phone"
+                  value={editResident.phone}
+                  onChangeText={val => setEditResident(r => ({ ...r, phone: val }))}
+                  placeholderTextColor={darkMode ? '#888' : '#999'}
+                />
+                <Text style={[styles.inputLabel, darkMode && styles.inputLabelDark]}>Move-in Date</Text>
+                <TextInput
+                  style={[styles.input, darkMode && styles.inputDark]}
+                  placeholder="YYYY-MM-DD"
+                  value={editResident.moveInDate}
+                  onChangeText={val => setEditResident(r => ({ ...r, moveInDate: val }))}
+                  placeholderTextColor={darkMode ? '#888' : '#999'}
+                />
+              </View>
+            )}
+            <View style={{ flexDirection: 'row', marginTop: 16 }}>
+              <TouchableOpacity style={[styles.addUnitModalBtn, { backgroundColor: '#E53935', marginRight: 8 }]} onPress={() => setEditUnitModal(false)}>
+                <Text style={{ color: '#FFF', fontWeight: 'bold' }}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.addUnitModalBtn, { backgroundColor: '#1E88E5' }]} onPress={handleEditUnit}>
+                <Text style={{ color: '#FFF', fontWeight: 'bold' }}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -717,5 +887,106 @@ const styles = StyleSheet.create({
   },
   residentDetailTextDark: {
     color: '#FFFFFF',
+  },
+  addUnitButton: {
+    backgroundColor: '#1E88E5',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  addUnitButtonDark: {
+    backgroundColor: '#333',
+  },
+  addUnitButtonText: {
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 15,
+    color: '#FFFFFF',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addUnitModal: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    width: '92%',
+    maxHeight: '92%',
+    padding: 16,
+  },
+  addUnitModalDark: {
+    backgroundColor: '#333',
+  },
+  modalTitle: {
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 20,
+    color: '#1E88E5',
+    marginBottom: 16,
+  },
+  modalTitleDark: {
+    color: '#FFFFFF',
+  },
+  input: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+  },
+  inputDark: {
+    backgroundColor: '#333',
+  },
+  inputLabel: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 8,
+  },
+  inputLabelDark: {
+    color: '#FFFFFF',
+  },
+  dropdownRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  dropdownBtn: {
+    backgroundColor: '#F3F4F6',
+    borderRadius: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  dropdownBtnActive: {
+    backgroundColor: '#1E88E5',
+  },
+  dropdownBtnText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    color: '#333',
+  },
+  dropdownBtnTextActive: {
+    color: '#FFFFFF',
+  },
+  addUnitModalBtn: {
+    flex: 1,
+    borderRadius: 8,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  editUnitBtn: {
+    marginLeft: 8,
+    backgroundColor: '#E8F4FD',
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editUnitBtnText: {
+    color: '#1E88E5',
+    fontFamily: 'Inter-SemiBold',
+    fontSize: 13,
   },
 });

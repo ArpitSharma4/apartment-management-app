@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, Bell, AlertCircle, PenTool as Tool, Users } from 'lucide-react-native';
+import { ArrowLeft, Bell, AlertCircle, PenTool as Tool, Users, AlertTriangle } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/context/ThemeContext';
 
-const DEMO_NOTIFICATIONS = [
+interface Notification {
+  id: string;
+  title: string;
+  body: string;
+  icon: React.ReactNode;
+  time: string;
+  read: boolean;
+}
+
+const DEMO_NOTIFICATIONS: Notification[] = [
   { id: '1', title: 'New Maintenance Request', body: 'Unit 304 - Leaking Faucet', icon: <Tool size={20} color="#E53935" />, time: '10 minutes ago', read: false },
   { id: '2', title: 'Package Delivered', body: 'Unit 201 - Amazon', icon: <Bell size={20} color="#1E88E5" />, time: '1 hour ago', read: false },
   { id: '3', title: 'New Resident', body: 'Unit 105 - John Smith', icon: <Users size={20} color="#4CAF50" />, time: '2 days ago', read: false },
@@ -15,7 +24,7 @@ const DEMO_NOTIFICATIONS = [
 export default function NotificationsScreen() {
   const router = useRouter();
   const { darkMode } = useTheme();
-  const [notifications, setNotifications] = useState(DEMO_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<Notification[]>(DEMO_NOTIFICATIONS);
 
   useEffect(() => {
     // Mark all as read when page is opened
@@ -36,7 +45,9 @@ export default function NotificationsScreen() {
         contentContainerStyle={{ padding: 16 }}
         renderItem={({ item }) => (
           <View style={[styles.notificationCard, darkMode && styles.notificationCardDark, item.read && styles.notificationCardRead]}> 
-            <View style={styles.iconContainer}>{item.icon}</View>
+            <View style={[styles.iconContainer, { backgroundColor: item.title.includes('Issue') ? '#FFEBEE' : '#F3F4F6' }]}>
+              {item.icon}
+            </View>
             <View style={styles.contentContainer}>
               <Text style={[styles.title, darkMode && styles.titleDark]}>{item.title}</Text>
               <Text style={[styles.body, darkMode && styles.bodyDark]}>{item.body}</Text>
