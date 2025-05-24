@@ -386,12 +386,12 @@ export default function DirectoryScreen() {
           </View>
           <View style={styles.apartmentStatus}>
             {item.status === 'occupied' ? (
-              <View style={styles.statusBadge}>
+              <View style={[styles.statusBadge, darkMode && styles.statusBadgeDark]}>
                 <CheckCircle2 size={16} color="#4CAF50" />
                 <Text style={[styles.statusText, darkMode && styles.statusTextDark]}>Occupied</Text>
               </View>
             ) : (
-              <View style={styles.statusBadge}>
+              <View style={[styles.statusBadge, darkMode && styles.statusBadgeDark]}>
                 <XCircle size={16} color="#E53935" />
                 <Text style={[styles.statusText, darkMode && styles.statusTextDark]}>Vacant</Text>
               </View>
@@ -399,8 +399,8 @@ export default function DirectoryScreen() {
             <ChevronRight size={20} color="#9CA3AF" />
             {/* Edit button for admin only */}
             {userRole === 'admin' && (
-              <TouchableOpacity style={styles.editUnitBtn} onPress={() => { setEditUnit(item); setEditUnitModal(true); }}>
-                <Text style={styles.editUnitBtnText}>Edit</Text>
+              <TouchableOpacity style={[styles.editUnitBtn, darkMode && styles.editUnitBtnDark]} onPress={() => { setEditUnit(item); setEditUnitModal(true); }}>
+                <Text style={[styles.editUnitBtnText, darkMode && styles.editUnitBtnTextDark]}>Edit</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -443,8 +443,8 @@ export default function DirectoryScreen() {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={[styles.headerTitle, darkMode && styles.headerTitleDark]}>HomeHarbor</Text>
-          <TouchableOpacity style={styles.filterButton} onPress={toggleFilters}>
-            <Filter size={24} color="#1E88E5" />
+          <TouchableOpacity style={[styles.filterButton, darkMode && styles.filterButtonDark]} onPress={toggleFilters}>
+            <Filter size={24} color={darkMode ? '#FFF' : '#1E88E5'} />
           </TouchableOpacity>
         </View>
         {/* Add Unit Button for Admin Only */}
@@ -500,19 +500,19 @@ export default function DirectoryScreen() {
           </View>
         </Modal>
         
-        <View style={styles.searchContainer}>
-          <Search size={20} color="#6B7280" />
+        <View style={[styles.searchContainer, darkMode && styles.searchContainerDark]}>
+          <Search size={20} color={darkMode ? '#FFF' : '#6B7280'} />
           <TextInput
             style={[styles.searchInput, darkMode && styles.searchInputDark]}
             placeholder="Search by unit or resident name"
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholderTextColor="#6B7280"
+            placeholderTextColor={darkMode ? '#888' : '#6B7280'}
           />
         </View>
         
         {showFilters && (
-          <Animated.View style={[styles.filtersContainer, { opacity: fadeAnim }]}>
+          <Animated.View style={[styles.filtersContainer, darkMode && styles.filtersContainerDark, { opacity: fadeAnim }]}>
             <View style={styles.filterSection}>
               <Text style={[styles.filterLabel, darkMode && styles.filterLabelDark]}>Status</Text>
               <View style={styles.filterOptions}>
@@ -715,6 +715,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  filterButtonDark: {
+    backgroundColor: '#181818',
+  },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -727,6 +730,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
+  },
+  searchContainerDark: {
+    backgroundColor: '#181818',
   },
   searchInput: {
     flex: 1,
@@ -749,6 +755,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
+  },
+  filtersContainerDark: {
+    backgroundColor: '#181818',
   },
   filterSection: {
     marginBottom: 16,
@@ -841,6 +850,9 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 8,
     marginRight: 8,
+  },
+  statusBadgeDark: {
+    backgroundColor: '#181818',
   },
   statusText: {
     fontFamily: 'Inter-Medium',
@@ -984,9 +996,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  editUnitBtnDark: {
+    backgroundColor: '#181818',
+  },
   editUnitBtnText: {
     color: '#1E88E5',
     fontFamily: 'Inter-SemiBold',
     fontSize: 13,
+  },
+  editUnitBtnTextDark: {
+    color: '#FFF',
   },
 });

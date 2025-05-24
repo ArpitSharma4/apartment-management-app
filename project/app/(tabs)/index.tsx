@@ -530,12 +530,16 @@ interface SimpleModalProps {
   darkMode: boolean;
 }
 
-function InviteVisitorModal({ visible, onClose, darkMode }: SimpleModalProps) {
+function InviteVisitorModal({ visible, onClose, darkMode, onInviteVisitor }: SimpleModalProps & { onInviteVisitor: (name: string, visitTime: string, purpose: string) => void }) {
   const [name, setName] = React.useState('');
   const [mobile, setMobile] = React.useState('');
   const [visitTime, setVisitTime] = React.useState('');
   const [purpose, setPurpose] = React.useState('');
   const [submitted, setSubmitted] = React.useState(false);
+  const handleSubmit = () => {
+    setSubmitted(true);
+    onInviteVisitor(name, visitTime, purpose);
+  };
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
@@ -559,7 +563,7 @@ function InviteVisitorModal({ visible, onClose, darkMode }: SimpleModalProps) {
               <TextInput style={[styles.input, darkMode && styles.inputDark]} placeholder="Mobile Number" placeholderTextColor={darkMode ? '#888' : '#999'} value={mobile} onChangeText={setMobile} keyboardType="phone-pad" />
               <TextInput style={[styles.input, darkMode && styles.inputDark]} placeholder="Visit Time (e.g., 2024-06-01 15:00)" placeholderTextColor={darkMode ? '#888' : '#999'} value={visitTime} onChangeText={setVisitTime} />
               <TextInput style={[styles.input, darkMode && styles.inputDark]} placeholder="Purpose" placeholderTextColor={darkMode ? '#888' : '#999'} value={purpose} onChangeText={setPurpose} />
-              <TouchableOpacity style={[styles.editProfileButton, { marginTop: 12 }]} onPress={() => setSubmitted(true)} disabled={!name || !mobile || !visitTime || !purpose}>
+              <TouchableOpacity style={[styles.editProfileButton, { marginTop: 12 }]} onPress={handleSubmit} disabled={!name || !mobile || !visitTime || !purpose}>
                 <Text style={styles.editProfileButtonText}>Generate Pass</Text>
               </TouchableOpacity>
             </>
@@ -570,12 +574,16 @@ function InviteVisitorModal({ visible, onClose, darkMode }: SimpleModalProps) {
   );
 }
 
-function BookAmenityModal({ visible, onClose, darkMode }: SimpleModalProps) {
+function BookAmenityModal({ visible, onClose, darkMode, onBookAmenity }: SimpleModalProps & { onBookAmenity: (amenity: string, date: string, time: string) => void }) {
   const [amenity, setAmenity] = React.useState('Gym');
   const [date, setDate] = React.useState('');
   const [time, setTime] = React.useState('');
   const [submitted, setSubmitted] = React.useState(false);
   const amenities = ['Gym', 'Clubhouse', 'Pool', 'Tennis Court'];
+  const handleConfirm = () => {
+    setSubmitted(true);
+    onBookAmenity(amenity, date, time);
+  };
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
@@ -604,7 +612,7 @@ function BookAmenityModal({ visible, onClose, darkMode }: SimpleModalProps) {
               </View>
               <TextInput style={[styles.input, darkMode && styles.inputDark]} placeholder="Date (e.g., 2024-06-01)" placeholderTextColor={darkMode ? '#888' : '#999'} value={date} onChangeText={setDate} />
               <TextInput style={[styles.input, darkMode && styles.inputDark]} placeholder="Time Slot (e.g., 16:00-17:00)" placeholderTextColor={darkMode ? '#888' : '#999'} value={time} onChangeText={setTime} />
-              <TouchableOpacity style={[styles.editProfileButton, { marginTop: 12 }]} onPress={() => setSubmitted(true)} disabled={!date || !time}>
+              <TouchableOpacity style={[styles.editProfileButton, { marginTop: 12 }]} onPress={handleConfirm} disabled={!date || !time}>
                 <Text style={styles.editProfileButtonText}>Confirm Booking</Text>
               </TouchableOpacity>
             </>
@@ -751,39 +759,34 @@ function StaffTaskCard({ task, status, onAccept, onReject, darkMode }: StaffTask
       renderLeftActions={() => (
         <View style={{ flex: 1, backgroundColor: '#E8F5E9', justifyContent: 'center', alignItems: 'flex-start', borderRadius: 12 }}>
           <Text style={{ color: '#4CAF50', fontWeight: 'bold', fontSize: 16, marginLeft: 24 }}>Accepted</Text>
-            </View>
+        </View>
       )}
       renderRightActions={() => (
         <View style={{ flex: 1, backgroundColor: '#FFEBEE', justifyContent: 'center', alignItems: 'flex-end', borderRadius: 12 }}>
           <Text style={{ color: '#E53935', fontWeight: 'bold', fontSize: 16, marginRight: 24 }}>Rejected</Text>
-            </View>
+        </View>
       )}
       onSwipeableLeftOpen={() => {
         onAccept();
-        // Add a small delay before removing the task
-        setTimeout(() => {
-          onAccept();
-        }, 300);
       }}
       onSwipeableRightOpen={() => {
         onReject();
-        // Add a small delay before removing the task
-        setTimeout(() => {
-          onReject();
-        }, 300);
       }}
       overshootLeft={false}
       overshootRight={false}
       enabled={status === 'pending'}
     >
-      <View style={[styles.taskCard, { backgroundColor: bgColor }, darkMode && styles.taskCardDark]}>
+      <View 
+        style={[styles.taskCard, darkMode && styles.taskCardDark, { backgroundColor: bgColor }, darkMode && status === 'pending' && { backgroundColor: '#222' }]}
+        // Remove any onPress handlers to prevent task details from showing
+      >
         <View style={[styles.taskPriority, { backgroundColor: priorityColor }]} />
         <View style={styles.taskContent}>
-          <Text style={styles.taskTitle}>{task.title}</Text>
-          <Text style={styles.taskLocation}>{task.location}</Text>
-          <Text style={styles.taskTime}>{task.time}</Text>
-          <View style={[styles.taskStatus, { backgroundColor: priorityColor + '22' }]}> {/* faded */}
-            <Text style={[styles.taskStatusText, { color: priorityColor }]}>{task.priority} Priority</Text>
+          <Text style={[styles.taskTitle, darkMode && styles.taskTitleDark]}>{task.title}</Text>
+          <Text style={[styles.taskLocation, darkMode && styles.taskLocationDark]}>{task.location}</Text>
+          <Text style={[styles.taskTime, darkMode && styles.taskTimeDark]}>{task.time}</Text>
+          <View style={[styles.taskStatus, { backgroundColor: priorityColor + '22' }, darkMode && styles.taskStatusDark]}>
+            <Text style={[styles.taskStatusText, { color: priorityColor }, darkMode && styles.taskStatusTextDark]}>{task.priority} Priority</Text>
           </View>
           {status !== 'pending' && (
             <View style={[styles.taskStatus, statusBg, { marginTop: 8 }]}> 
@@ -791,11 +794,6 @@ function StaffTaskCard({ task, status, onAccept, onReject, darkMode }: StaffTask
             </View>
           )}
         </View>
-        {status === 'pending' && (
-          <TouchableOpacity style={[styles.taskAction, { backgroundColor: '#E8F4FD' }]} onPress={onAccept}>
-            <Text style={styles.taskActionText}>Accept</Text>
-          </TouchableOpacity>
-        )}
       </View>
     </Swipeable>
   );
@@ -881,20 +879,42 @@ export default function HomeScreen() {
   });
 
   const [visibleTasks, setVisibleTasks] = React.useState(STAFF_TASKS);
+  const [acceptedTasks, setAcceptedTasks] = React.useState<StaffTask[]>([]);
+
+  const [isProcessingAction, setIsProcessingAction] = React.useState(false);
 
   const handleAccept = (id: string) => {
+    if (isProcessingAction) return;
+    
+    setIsProcessingAction(true);
     setTaskStatuses(s => ({ ...s, [id]: 'accepted' }));
+    // Add the task to accepted tasks only if it's not already there
+    const taskToAccept = STAFF_TASKS.find(task => task.id === id);
+    if (taskToAccept) {
+      setAcceptedTasks(prev => {
+        // Check if task already exists in acceptedTasks
+        if (prev.some(task => task.id === id)) {
+          return prev;
+        }
+        return [...prev, taskToAccept];
+      });
+    }
     // Remove the task after a short delay
     setTimeout(() => {
       setVisibleTasks(tasks => tasks.filter(task => task.id !== id));
+      setIsProcessingAction(false);
     }, 300);
   };
 
   const handleReject = (id: string) => {
+    if (isProcessingAction) return;
+    
+    setIsProcessingAction(true);
     setTaskStatuses(s => ({ ...s, [id]: 'rejected' }));
     // Remove the task after a short delay
     setTimeout(() => {
       setVisibleTasks(tasks => tasks.filter(task => task.id !== id));
+      setIsProcessingAction(false);
     }, 300);
   };
 
@@ -1092,33 +1112,33 @@ export default function HomeScreen() {
             <Text style={[styles.sectionTitle, darkMode && styles.sectionTitleDark]}>Upcoming Events</Text>
           </View>
           
-          <View style={styles.eventCard}>
+          <View style={[styles.eventCard, darkMode && styles.eventCardDark]}>
             <View style={styles.eventDateContainer}>
               <Text style={styles.eventMonth}>JUN</Text>
               <Text style={styles.eventDay}>18</Text>
             </View>
             <View style={styles.eventContent}>
-              <Text style={styles.eventTitle}>Community Barbecue</Text>
-              <Text style={styles.eventTime}>
-                <Clock size={14} color="#6B7280" style={{ marginRight: 4 }} /> 
+              <Text style={[styles.eventTitle, darkMode && styles.eventTitleDark]}>Community Barbecue</Text>
+              <Text style={[styles.eventTime, darkMode && styles.eventTimeDark]}>
+                <Clock size={14} color={darkMode ? '#FFF' : '#6B7280'} style={{ marginRight: 4 }} /> 
                 Saturday, 4:00 PM - 7:00 PM
               </Text>
-              <Text style={styles.eventLocation}>Pool Area</Text>
+              <Text style={[styles.eventLocation, darkMode && styles.eventLocationDark]}>Pool Area</Text>
             </View>
           </View>
           
-          <View style={styles.eventCard}>
+          <View style={[styles.eventCard, darkMode && styles.eventCardDark]}>
             <View style={styles.eventDateContainer}>
               <Text style={styles.eventMonth}>JUN</Text>
               <Text style={styles.eventDay}>25</Text>
             </View>
             <View style={styles.eventContent}>
-              <Text style={styles.eventTitle}>Resident Meeting</Text>
-              <Text style={styles.eventTime}>
-                <Clock size={14} color="#6B7280" style={{ marginRight: 4 }} /> 
+              <Text style={[styles.eventTitle, darkMode && styles.eventTitleDark]}>Resident Meeting</Text>
+              <Text style={[styles.eventTime, darkMode && styles.eventTimeDark]}>
+                <Clock size={14} color={darkMode ? '#FFF' : '#6B7280'} style={{ marginRight: 4 }} /> 
                 Saturday, 6:00 PM - 7:00 PM
               </Text>
-              <Text style={styles.eventLocation}>Community Hall</Text>
+              <Text style={[styles.eventLocation, darkMode && styles.eventLocationDark]}>Community Hall</Text>
             </View>
           </View>
         </View>
@@ -1198,58 +1218,69 @@ export default function HomeScreen() {
             />
           ))}
         </View>
-        
-        <View style={styles.section}>
+        {/* In Progress Section */}
+        <View style={[styles.section, darkMode && styles.sectionDark]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>In Progress</Text>
+            <Text style={[styles.sectionTitle, darkMode && styles.sectionTitleDark]}>In Progress</Text>
           </View>
-          
-          <View style={styles.activityCard}>
+          <View style={[styles.activityCard, darkMode && styles.activityCardDark]}> {/* In Progress Card */}
             <View style={styles.activityIconContainer}>
               <Tool size={20} color="#1E88E5" />
             </View>
             <View style={styles.activityContent}>
-              <Text style={styles.activityTitle}>AC Maintenance</Text>
-              <Text style={styles.activityDescription}>Unit 105 - Started 3 hours ago</Text>
-              <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: '60%' }]} />
+              <Text style={[styles.activityTitle, darkMode && styles.activityTitleDark]}>AC Maintenance</Text>
+              <Text style={[styles.activityDescription, darkMode && styles.activityDescriptionDark]}>Unit 105 - Started 3 hours ago</Text>
+              <View style={[styles.progressBar, darkMode && styles.progressBarDark]}>
+                <View style={[styles.progressFill, { width: '60%' }, darkMode && styles.progressFillDark]} />
               </View>
             </View>
-            <TouchableOpacity style={styles.completeButton}>
-              <Text style={styles.completeButtonText}>Complete</Text>
+            <TouchableOpacity style={[styles.completeButton, darkMode && styles.completeButtonDark]}>
+              <Text style={[styles.completeButtonText, darkMode && styles.completeButtonTextDark]}>Complete</Text>
             </TouchableOpacity>
           </View>
         </View>
-        
-        <View style={styles.section}>
+        {/* Today's Schedule Section */}
+        <View style={[styles.section, darkMode && styles.sectionDark]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Today's Schedule</Text>
+            <Text style={[styles.sectionTitle, darkMode && styles.sectionTitleDark]}>Today's Schedule</Text>
           </View>
-          
-          <View style={styles.scheduleCard}>
-            <Text style={styles.scheduleTime}>10:00 AM</Text>
-            <View style={styles.scheduleDivider} />
+          {/* Show accepted tasks first */}
+          {acceptedTasks.map(task => (
+            <View key={task.id} style={[styles.scheduleCard, darkMode && styles.scheduleCardDark]}>
+              <Text style={[styles.scheduleTime, darkMode && styles.scheduleTimeDark]}>ASAP</Text>
+              <View style={[styles.scheduleDivider, darkMode && styles.scheduleDividerDark]} />
+              <View style={styles.scheduleContent}>
+                <Text style={[styles.scheduleTitle, darkMode && styles.scheduleTitleDark]}>{task.title}</Text>
+                <Text style={[styles.scheduleDescription, darkMode && styles.scheduleDescriptionDark]}>{task.location}</Text>
+                <View style={[styles.taskStatus, { backgroundColor: PRIORITY_COLORS[task.priority] + '22' }, darkMode && styles.taskStatusDark]}>
+                  <Text style={[styles.taskStatusText, { color: PRIORITY_COLORS[task.priority] }, darkMode && styles.taskStatusTextDark]}>{task.priority} Priority</Text>
+                </View>
+              </View>
+            </View>
+          ))}
+          {/* Show regular scheduled tasks */}
+          <View style={[styles.scheduleCard, darkMode && styles.scheduleCardDark]}>
+            <Text style={[styles.scheduleTime, darkMode && styles.scheduleTimeDark]}>10:00 AM</Text>
+            <View style={[styles.scheduleDivider, darkMode && styles.scheduleDividerDark]} />
             <View style={styles.scheduleContent}>
-              <Text style={styles.scheduleTitle}>Pool Maintenance</Text>
-              <Text style={styles.scheduleDescription}>Regular cleaning and chemical check</Text>
+              <Text style={[styles.scheduleTitle, darkMode && styles.scheduleTitleDark]}>Pool Maintenance</Text>
+              <Text style={[styles.scheduleDescription, darkMode && styles.scheduleDescriptionDark]}>Regular cleaning and chemical check</Text>
             </View>
           </View>
-          
-          <View style={styles.scheduleCard}>
-            <Text style={styles.scheduleTime}>2:00 PM</Text>
-            <View style={styles.scheduleDivider} />
+          <View style={[styles.scheduleCard, darkMode && styles.scheduleCardDark]}>
+            <Text style={[styles.scheduleTime, darkMode && styles.scheduleTimeDark]}>2:00 PM</Text>
+            <View style={[styles.scheduleDivider, darkMode && styles.scheduleDividerDark]} />
             <View style={styles.scheduleContent}>
-              <Text style={styles.scheduleTitle}>Package Delivery</Text>
-              <Text style={styles.scheduleDescription}>Distribute packages to residents</Text>
+              <Text style={[styles.scheduleTitle, darkMode && styles.scheduleTitleDark]}>Package Delivery</Text>
+              <Text style={[styles.scheduleDescription, darkMode && styles.scheduleDescriptionDark]}>Distribute packages to residents</Text>
             </View>
           </View>
-          
-          <View style={styles.scheduleCard}>
-            <Text style={styles.scheduleTime}>4:00 PM</Text>
-            <View style={styles.scheduleDivider} />
+          <View style={[styles.scheduleCard, darkMode && styles.scheduleCardDark]}>
+            <Text style={[styles.scheduleTime, darkMode && styles.scheduleTimeDark]}>4:00 PM</Text>
+            <View style={[styles.scheduleDivider, darkMode && styles.scheduleDividerDark]} />
             <View style={styles.scheduleContent}>
-              <Text style={styles.scheduleTitle}>Grounds Inspection</Text>
-              <Text style={styles.scheduleDescription}>Check landscaping and common areas</Text>
+              <Text style={[styles.scheduleTitle, darkMode && styles.scheduleTitleDark]}>Grounds Inspection</Text>
+              <Text style={[styles.scheduleDescription, darkMode && styles.scheduleDescriptionDark]}>Check landscaping and common areas</Text>
             </View>
           </View>
         </View>
@@ -1344,12 +1375,53 @@ export default function HomeScreen() {
     };
     setNotifications(prev => [newNotification, ...prev]);
     setNotificationCount(prev => prev + 1);
+
+    // Also add to residentRequests
+    setResidentRequests(prev => [
+      {
+        id: Date.now().toString(),
+        title: `${issueType} Issue`,
+        description,
+        status: 'In Progress',
+        time: 'Just now',
+        icon: <AlertTriangle size={20} color="#E53935" />,
+      },
+      ...prev
+    ]);
+  };
+
+  const handleBookAmenity = (amenity: string, date: string, time: string) => {
+    setResidentRequests(prev => [
+      {
+        id: Date.now().toString(),
+        title: `Amenity Booking: ${amenity}`,
+        description: `Booked for ${date} at ${time}`,
+        status: 'In Progress',
+        time: 'Just now',
+        icon: <CalendarIcon size={20} color="#1E88E5" />,
+      },
+      ...prev
+    ]);
+  };
+
+  const handleInviteVisitor = (name: string, visitTime: string, purpose: string) => {
+    setResidentRequests(prev => [
+      {
+        id: Date.now().toString(),
+        title: `Visitor: ${name}`,
+        description: `Visit at ${visitTime}. Purpose: ${purpose}`,
+        status: 'In Progress',
+        time: 'Just now',
+        icon: <Users size={20} color="#1E88E5" />,
+      },
+      ...prev
+    ]);
   };
 
   return (
     <SafeAreaView style={[styles.container, darkMode && styles.containerDark]}>
       <StatusBar style="auto" />
-      <View style={styles.header}>
+      <View style={[styles.header, darkMode && styles.headerDark]}>
         <View>
           <Text style={[styles.headerTitle, darkMode && styles.headerTitleDark]}>
             Welcome, {user?.name || 'User'}
@@ -1390,8 +1462,8 @@ export default function HomeScreen() {
         darkMode={darkMode}
         onSave={handleActivitySave}
       />
-      <InviteVisitorModal visible={inviteVisitorModal} onClose={() => setInviteVisitorModal(false)} darkMode={darkMode} />
-      <BookAmenityModal visible={bookAmenityModal} onClose={() => setBookAmenityModal(false)} darkMode={darkMode} />
+      <InviteVisitorModal visible={inviteVisitorModal} onClose={() => setInviteVisitorModal(false)} darkMode={darkMode} onInviteVisitor={handleInviteVisitor} />
+      <BookAmenityModal visible={bookAmenityModal} onClose={() => setBookAmenityModal(false)} darkMode={darkMode} onBookAmenity={handleBookAmenity} />
       <ReportIssueModal 
         visible={reportIssueModal} 
         onClose={() => setReportIssueModal(false)} 
@@ -1439,6 +1511,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
+  },
+  headerDark: {
+    backgroundColor: '#121212',
+    borderBottomColor: '#222',
   },
   headerTitle: {
     fontFamily: 'Inter-SemiBold',
@@ -1683,6 +1759,9 @@ const styles = StyleSheet.create({
     elevation: 1,
     overflow: 'hidden',
   },
+  eventCardDark: {
+    backgroundColor: '#222',
+  },
   eventDateContainer: {
     width: 60,
     alignItems: 'center',
@@ -1709,6 +1788,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#111827',
   },
+  eventTitleDark: {
+    color: '#FFF',
+  },
   eventTime: {
     fontFamily: 'Inter-Regular',
     fontSize: 14,
@@ -1717,11 +1799,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  eventTimeDark: {
+    color: '#FFF',
+  },
   eventLocation: {
     fontFamily: 'Inter-Regular',
     fontSize: 14,
     color: '#6B7280',
     marginTop: 2,
+  },
+  eventLocationDark: {
+    color: '#FFF',
   },
   taskCard: {
     flexDirection: 'row',
@@ -2559,4 +2647,18 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     alignItems: 'center',
   },
+  taskTitleDark: { color: '#FFF' },
+  taskLocationDark: { color: '#CCC' },
+  taskTimeDark: { color: '#AAA' },
+  taskStatusDark: { backgroundColor: '#333' },
+  taskStatusTextDark: { color: '#FFF' },
+  progressBarDark: { backgroundColor: '#333' },
+  progressFillDark: { backgroundColor: '#1E88E5' },
+  completeButtonDark: { backgroundColor: '#333' },
+  completeButtonTextDark: { color: '#FFF' },
+  scheduleCardDark: { backgroundColor: '#222' },
+  scheduleTimeDark: { color: '#81b0ff' },
+  scheduleTitleDark: { color: '#FFF' },
+  scheduleDescriptionDark: { color: '#CCC' },
+  scheduleDividerDark: { backgroundColor: '#333' },
 });

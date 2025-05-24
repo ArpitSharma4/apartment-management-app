@@ -316,20 +316,6 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Quick Action Card */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, darkMode && styles.sectionTitleDark]}>Quick Actions</Text>
-          <TouchableOpacity
-            style={[styles.quickActionCard, darkMode && styles.quickActionCardDark]}
-            onPress={() => setAnnouncementModal(true)}
-          >
-            <View style={[styles.quickActionIcon, { backgroundColor: '#E8F4FD' }]}>
-              <Bell size={24} color="#1E88E5" />
-            </View>
-            <Text style={[styles.quickActionText, darkMode && styles.quickActionTextDark]}>Announcements</Text>
-          </TouchableOpacity>
-        </View>
-
         {/* Logout Button */}
         <TouchableOpacity
           style={[styles.logoutButton, darkMode && styles.logoutButtonDark]}
@@ -448,33 +434,6 @@ const styles = StyleSheet.create({
     color: '#E53935',
     marginLeft: 8,
   },
-  quickActionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  quickActionCardDark: {
-    backgroundColor: '#333',
-  },
-  quickActionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  quickActionText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 16,
-    color: '#333',
-  },
-  quickActionTextDark: {
-    color: '#FFFFFF',
-  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -521,22 +480,6 @@ const styles = StyleSheet.create({
   profileField: {
     marginBottom: 10,
   },
-  profileLabel: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 16,
-    color: '#333',
-  },
-  profileLabelDark: {
-    color: '#FFFFFF',
-  },
-  profileValue: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 16,
-    color: '#6B7280',
-  },
-  profileValueDark: {
-    color: '#9CA3AF',
-  },
   editProfileButton: {
     backgroundColor: '#1E88E5',
     padding: 12,
@@ -566,5 +509,21 @@ const styles = StyleSheet.create({
   feedbackInputDark: {
     backgroundColor: '#333',
     color: '#FFF',
+  },
+  profileLabel: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 16,
+    color: '#333',
+  },
+  profileLabelDark: {
+    color: '#FFFFFF',
+  },
+  profileValue: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 16,
+    color: '#6B7280',
+  },
+  profileValueDark: {
+    color: '#9CA3AF',
   },
 }); 
