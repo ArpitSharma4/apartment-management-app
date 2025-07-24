@@ -1,88 +1,92 @@
-🏢 Apartment Management App
-A mobile-first React Native application for managing apartment communities. This app simplifies operations for tenants, owners, employees, and administrators by using a local database (e.g., SQLite or Realm) — ensuring offline-first functionality.
+# 🏢 Apartment Management App
 
-📱 Tech Stack
-Framework: React Native (via Expo)
+A **mobile-first React Native application** for managing apartment communities. This app simplifies operations for tenants, owners, employees, and administrators by using a **local database** (e.g., SQLite or Realm) — ensuring **offline-first** functionality.
 
-Language: TypeScript
+---
 
-Navigation: React Navigation
+## 📱 Tech Stack
 
-Database: Local database (likely SQLite or Realm)
+| Feature       | Technology                     |
+|--------------|----------------------------------|
+| Framework     | React Native (via Expo)         |
+| Language      | TypeScript                      |
+| Navigation    | React Navigation                |
+| Database      | Local DB (SQLite or Realm)      |
+| Package Manager | npm                          |
 
-Package Manager: npm
+---
 
-📦 Folder Structure
-📁 .expo/                # Expo config
-📁 node_modules/         # Dependencies
-📁 project/              # Main source code for the app
-├── screens/             # App screens (Admin, Tenant, Owner, etc.)
-├── components/          # Reusable UI components
-├── database/            # Local DB logic (tables, queries, etc.)
-├── navigation/          # Stack/tab navigators
-├── utils/               # Helper functions
-├── assets/              # Images/icons/fonts
-🚀 Features
-🧑‍💼 Admin
-Login/logout
+## 📦 Folder Structure
 
-View all tenants and owners
+.
+├── .expo/ # Expo config
+├── node_modules/ # Dependencies
+├── project/
+│ ├── screens/ # App screens (Admin, Tenant, Owner, etc.)
+│ ├── components/ # Reusable UI components
+│ ├── database/ # Local DB logic (tables, queries, etc.)
+│ ├── navigation/ # Stack/tab navigators
+│ ├── utils/ # Helper functions
+│ └── assets/ # Images/icons/fonts
+├── app.json
+├── package.json
+├── tsconfig.json
 
-Assign parking slots
 
-View complaint logs
+---
 
-Dashboard summary (total tenants, employees, owners)
+## 🚀 Features
 
-🏠 Owner
-View/manage tenants
+### 🧑‍💼 Admin
+- Login/logout
+- View all tenants and owners
+- Assign parking slots
+- View complaint logs
+- Dashboard summary (total tenants, employees, owners)
 
-Raise/view complaints
+### 🏠 Owner
+- View/manage tenants
+- Raise/view complaints
+- View room and parking details
 
-View room and parking details
+### 👨‍👩‍👧 Tenant
+- View personal and room info
+- Raise maintenance requests
+- Track complaint status
+- View assigned parking
 
-👨‍👩‍👧 Tenant
-View personal details and room info
+### 🧹 Employee
+- View all open complaints
+- Track status of assigned work
 
-Raise maintenance requests
+---
 
-Track complaint status
+## 🗃️ Local Database
 
-View assigned parking
+This app uses a **local storage system** such as **SQLite** for data persistence:
 
-🧹 Employee
-View all open complaints
+- 📴 Works offline
+- ⚡ Lightweight and efficient
+- 🔄 Handles local CRUD operations
 
-Track status of assigned work
+📂 Database logic can be found in:  
+`project/database/`
 
-🗃️ Local Database
-This app uses a local storage system (such as SQLite) for data persistence:
+---
 
-Works offline
+## 🛠️ Setup Instructions
 
-Lightweight and efficient for mobile devices
+### ✅ Prerequisites
 
-CRUD operations handled locally
+- [Node.js](https://nodejs.org/)
+- [npm](https://www.npmjs.com/)
+- [Expo CLI](https://docs.expo.dev/) (Install using: `npm install -g expo-cli`)
+- Android Studio or Expo Go on your phone
 
-You’ll find database code inside the project/database/ directory.
+### 📥 Installation
 
-🛠️ Setup Instructions
-Prerequisites
-Node.js and npm installed
-
-Expo CLI installed (npm install -g expo-cli)
-
-Android Studio or Expo Go on mobile
-
+```bash
 git clone https://github.com/ArpitSharma4/apartment-management-app.git
 cd apartment-management-app
 npm install
 npx expo start
-Scan the QR code with Expo Go (on Android/iOS) to run the app.
-
-
-🤝 Contributors
-Arpit Sharma
-
-📄 License
-This project is licensed under the MIT License.
