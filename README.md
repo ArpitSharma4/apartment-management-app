@@ -44,14 +44,11 @@ A **mobile-first React Native application** for managing apartment communities. 
 
 ## 🗃️ Local Database
 
-This app uses a **local storage system** such as **SQLite** for data persistence:
+This app uses a **local storage system** such as **react-native** for data persistence,it is a temporary storage system:
 
 - 📴 Works offline
 - ⚡ Lightweight and efficient
 - 🔄 Handles local CRUD operations
-
-📂 Database logic can be found in:  
-`project/database/`
 
 ---
 
