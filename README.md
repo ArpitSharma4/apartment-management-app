@@ -16,25 +16,6 @@ A **mobile-first React Native application** for managing apartment communities. 
 
 ---
 
-## 📦 Folder Structure
-
-.
-├── .expo/ # Expo config
-├── node_modules/ # Dependencies
-├── project/
-│ ├── screens/ # App screens (Admin, Tenant, Owner, etc.)
-│ ├── components/ # Reusable UI components
-│ ├── database/ # Local DB logic (tables, queries, etc.)
-│ ├── navigation/ # Stack/tab navigators
-│ ├── utils/ # Helper functions
-│ └── assets/ # Images/icons/fonts
-├── app.json
-├── package.json
-├── tsconfig.json
-
-
----
-
 ## 🚀 Features
 
 ### 🧑‍💼 Admin
