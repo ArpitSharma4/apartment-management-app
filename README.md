@@ -1,6 +1,6 @@
 # 🏢 Apartment Management App
 
-A **mobile-first React Native application** for managing apartment communities. This app simplifies operations for tenants, owners, employees, and administrators by using a **local database** (e.g., SQLite or Realm) — ensuring **offline-first** functionality.
+A **mobile-first React Native application** for managing apartment communities. This app simplifies operations for tenants, owners, employees, and administrators by using a **local database**.
 
 ---
 
@@ -11,7 +11,7 @@ A **mobile-first React Native application** for managing apartment communities. 
 | Framework     | React Native (via Expo)         |
 | Language      | TypeScript                      |
 | Navigation    | React Navigation                |
-| Database      | Local DB (SQLite or Realm)      |
+| Database      | TReact Native                   |
 | Package Manager | npm                          |
 
 ---
