@@ -11,7 +11,7 @@ A **mobile-first React Native application** for managing apartment communities. 
 | Framework     | React Native (via Expo)         |
 | Language      | TypeScript                      |
 | Navigation    | React Navigation                |
-| Database      | TReact Native                   |
+| Database      | React Native                   |
 | Package Manager | npm                          |
 
 ---
